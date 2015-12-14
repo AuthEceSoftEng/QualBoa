@@ -133,11 +133,16 @@ public class GitHubFileDownloader {
 		GitHubFileDownloader gitHubDownloader = new GitHubFileDownloader("klearchos10", "kle1992");
 
 		String[] URL = gitHubDownloader.splitInput("Boa_output.txt");
-				
+
+		// Create the Files directory if it does not exist
+		if (!Files.exists(Paths.get("Files")))
+		    Files.createDirectories(Paths.get("Files"));
 		for(int i=0; i < URL.length;i++){
-			String fileContents = gitHubDownloader.downloadFile(URL[i]);
-			if (fileContents != null) {
-				Files.write(Paths.get("Files/sourceCode"+(i+1)+".java"), fileContents.getBytes());
+			if (!URL[i].equals("")){
+				String fileContents = gitHubDownloader.downloadFile(URL[i]);
+				if (fileContents != null) {
+					Files.write(Paths.get("Files/sourceCode"+(i+1)+".java"), fileContents.getBytes());
+				}
 			}
 		}
 		System.out.println("done");

@@ -43,7 +43,10 @@ public class Scorer {
 		scorer.quickSortHighToLow(fileContents,score,0,(score.length-1));
 		System.out.println(Arrays.toString(score));
 				
-		//write the files sorted
+		// Create the Final_Files directory if it does not exist
+		if (!Files.exists(Paths.get("Final_Files")))
+		    Files.createDirectories(Paths.get("Final_Files"));
+	//write the files sorted
 		for (int i=0;i<fileContents.length;i++){
 			Files.write(Paths.get("Final_Files/finalSourceCode"+(i+1)+".java"), fileContents[i].getBytes());
 		}

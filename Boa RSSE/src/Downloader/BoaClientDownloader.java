@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import Main.PropertiesHandler;
 import Parser.SignatureExtractor;
 import edu.iastate.cs.boa.*;
 
@@ -26,7 +27,7 @@ public class BoaClientDownloader {
 		Files.write(Paths.get("Query.txt"), query.getBytes());
 		
 		try (final BoaClient client = new BoaClient()) {
-			client.login("Klearchos","klearchos");	
+			client.login(PropertiesHandler.BoaUsername,PropertiesHandler.BoaPassword);	
 			try{
 				// print all available input datasets
 				//for (final InputHandle d : client.getDatasets())

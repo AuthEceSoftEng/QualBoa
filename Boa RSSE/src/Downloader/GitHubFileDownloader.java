@@ -12,6 +12,8 @@ import java.nio.file.Paths;
 
 import javax.xml.bind.DatatypeConverter;
 
+import Main.PropertiesHandler;
+
 /**
  * A downloader for files of the GitHub API.
  */
@@ -130,7 +132,7 @@ public class GitHubFileDownloader {
 	public static void main(String args[]) throws IOException {
 		// Input here your GitHub username and password
 		// Note that if the response code is 401, it means you provided a wrong username or password
-		GitHubFileDownloader gitHubDownloader = new GitHubFileDownloader("klearchos10", "kle1992");
+		GitHubFileDownloader gitHubDownloader = new GitHubFileDownloader(PropertiesHandler.GitHubUsername, PropertiesHandler.GitHubPassword);
 
 		String[] URL = gitHubDownloader.splitInput("Boa_output.txt");
 

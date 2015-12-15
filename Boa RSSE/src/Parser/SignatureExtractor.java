@@ -30,16 +30,22 @@ public class SignatureExtractor {
 		System.out.println(hasBlock);
 	}
 	
-	public SignatureExtractor(String path,String targetClassname) throws IOException{
+	public SignatureExtractor(String path,String targetClassName) throws IOException{
 		ast = ASTExtractor.parseFile(path);
 		Files.write(Paths.get("AST_XML.xml"), ast.getBytes());
 		className = "";
 		methodNames = "";
 		methodTypes = "";
 		hasBlock = "";
-		extractClassName(targetClassname);
-		extractMethodNames(targetClassname);
-		extractMethodTypes(targetClassname);
+		if (targetClassName==null || targetClassName=="-1"){
+			extractClassName();
+			extractMethodNames(null);
+			extractMethodTypes(null);
+		}else{
+			extractClassName(targetClassName);
+			extractMethodNames(targetClassName);
+			extractMethodTypes(targetClassName);
+		}
 		System.out.println(className);
 		System.out.println(methodNames);
 		System.out.println(methodTypes);
@@ -47,12 +53,10 @@ public class SignatureExtractor {
 	}
 	
 	public static void main(String[] args) throws IOException{
-		/*test
-		SignatureExtractor signature  = new SignatureExtractor("input.java");
-		String className = signature.getClassName();
-		String methodNames = signature.getMethodNames();
-		String methodTypes = signature.getMethodTypes();
-		*/
+		//test
+		//SignatureExtractor signature  = new SignatureExtractor("input.java");
+		//SignatureExtractor signature2  = new SignatureExtractor("Files/sourceCode113.java",signature.getClassName());
+
 		//Files.write(Paths.get("className.txt"), className.getBytes());
 		//Files.write(Paths.get("methodNames.txt"), methodNames.getBytes());
 		//Files.write(Paths.get("methodTypes.txt"), methodTypes.getBytes());
@@ -76,6 +80,8 @@ public class SignatureExtractor {
 			if (temp[i].matches("(?s)(.*)<MarkerAnnotation>(.*)"))
 				temp[i] = temp[i].substring(temp[i].indexOf("</MarkerAnnotation>"));
 			temp[i] = temp[i].substring(temp[i].indexOf("<SimpleName>")+12,temp[i].indexOf("</SimpleName>"));
+			if (temp[i].matches("_")) temp[i]="-1";
+			
 			if (i==1) className = "\""+temp[i]+"\"";
 			else className += ",\""+temp[i]+"\"";
 		}
@@ -127,12 +133,12 @@ public class SignatureExtractor {
 		
 		for (int i=1;i<temp.length;i++){
 			String block = "no";
-			if (temp[i].matches("(?s)(.*)<Javadoc>(.*)"))
-				temp[i] = temp[i].substring(temp[i].indexOf("</Javadoc>"));
 			if (temp[i].matches("(?s)(.*)<Block>(.*)")){
 				block = hasTrueBlock(temp[i]);
 				temp[i] = temp[i].substring(0,temp[i].indexOf("<Block>"));
-			}	
+			}
+			if (temp[i].matches("(?s)(.*)<Javadoc>(.*)"))
+				temp[i] = temp[i].substring(temp[i].indexOf("</Javadoc>"));
 			if (temp[i].matches("(?s)(.*)<SingleVariableDeclaration>(.*)"))
 				temp[i] = temp[i].substring(0,temp[i].indexOf("<SingleVariableDeclaration>"));
 			if (temp[i].matches("(?s)(.*)<ParameterizedType>(.*)"))

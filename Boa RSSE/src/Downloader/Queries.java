@@ -50,7 +50,7 @@ public class Queries {
 						"		cur_file = node.name;\n"+
 						"	}\n"+
 						"	before node: Declaration -> {\n"+
-						"		if (node.kind == TypeKind.CLASS && (lowercase(node.name) == lowercase(class_name) || match(lowercase(class_name), lowercase(node.name)))){\n"+
+						"		if (node.kind == TypeKind.CLASS && (class_name == \"-1\" || match(lowercase(class_name), lowercase(node.name)))){\n"+
 						"			for (j:=0; j < length; j++){\n"+
 						"				Flag1[j] = false;\n"+
 						"				Flag2[j] = false;\n"+

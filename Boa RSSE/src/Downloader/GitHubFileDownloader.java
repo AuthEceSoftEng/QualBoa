@@ -97,7 +97,7 @@ public class GitHubFileDownloader {
 			apiURL = apiURL.replace("https://github.com", "https://api.github.com/repos");
 			apiURL = apiURL.replace("blob/master", "contents");
 			String response = makeRestRequest(apiURL);
-			if (response != null) {
+			if (response != null && response.split("\"content\":\"").length > 1) {
 				response = response.split("\"content\":\"")[1].split("\"")[0].replace("\\n", "");
 				byte[] encodedResponse = DatatypeConverter.parseBase64Binary(response);
 				return new String(encodedResponse, StandardCharsets.UTF_8);

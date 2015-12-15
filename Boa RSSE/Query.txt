@@ -26,7 +26,7 @@ visit(p, visitor {
 		cur_file = node.name;
 	}
 	before node: Declaration -> {
-		if (node.kind == TypeKind.CLASS && (lowercase(node.name) == lowercase(class_name) || match(lowercase(class_name), lowercase(node.name)))){
+		if (node.kind == TypeKind.CLASS && (class_name == "-1" || match(lowercase(class_name), lowercase(node.name)))){
 			for (j:=0; j < length; j++){
 				Flag1[j] = false;
 				Flag2[j] = false;

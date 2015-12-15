@@ -5,8 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
-import Miner.PorterStemmer;
-
 import Parser.SignatureExtractor;
 
 import java.io.File;
@@ -43,10 +41,10 @@ public class Scorer {
 		SortFunctions.quickSortHighToLow(fileContents,score,0,(score.length-1));
 		System.out.println(Arrays.toString(score));
 				
-		// Create the Final_Files directory if it does not exist
+		// Create the Final_Files directory if it does not exist and write the files sorted
 		if (!Files.exists(Paths.get("Final_Files")))
 		    Files.createDirectories(Paths.get("Final_Files"));
-	//write the files sorted
+	
 		for (int i=0;i<fileContents.length;i++){
 			Files.write(Paths.get("Final_Files/finalSourceCode"+(i+1)+".java"), fileContents[i].getBytes());
 		}
@@ -65,8 +63,8 @@ public class Scorer {
 		double[] methodScore = methodsScore(inputSignature,outputSignature);
 		double[] scoreVector = new double[methodScore.length+1];
 		double[] defaultVector = new double[methodScore.length+1];
-		scoreVector[0]=classScore;
 		
+		scoreVector[0]=classScore;
 		for(int i=0;i<methodScore.length;i++) scoreVector[i+1]=methodScore[i];
 		for(int i=0;i<defaultVector.length;i++) defaultVector[i]=1;
 		
@@ -86,10 +84,10 @@ public class Scorer {
 		
 		if (inputStack.trim().equals("-1")) return 1.0;
 		
-		inputStack = stringProcess(inputStack);
-		outputStack = stringProcess(outputStack);
+		String[] inputStackTokens = stringProcess(inputStack);
+		String[] outputStackTokens = stringProcess(outputStack);
 		
-		double score = LevenshteinDistance(inputStack,outputStack);
+		double score = JaccardCoefficient.similarity(inputStackTokens,outputStackTokens);
 		
 		//test results
 		System.out.println("final:"+inputStack);
@@ -115,8 +113,8 @@ public class Scorer {
 		String[] outputMethodsType = outputMethodType.split(",");
 		String[] hasBlock = block.split(",");
 		
-		for (int i=0;i<inputMethodsName.length;i++) inputMethodsName[i] = stringProcess(inputMethodsName[i]);
-		for (int i=0;i<outputMethodsName.length;i++) outputMethodsName[i] = stringProcess(outputMethodsName[i]);
+		//for (int i=0;i<inputMethodsName.length;i++) inputMethodsName[i] = stringProcess(inputMethodsName[i]);
+		//for (int i=0;i<outputMethodsName.length;i++) outputMethodsName[i] = stringProcess(outputMethodsName[i]);
 				
 		double[] scoreMethodsName = new double[inputMethodsName.length];
 		double[] scoreMethodsType = new double[inputMethodsName.length];
@@ -127,24 +125,26 @@ public class Scorer {
 		
 		for (int i=0;i<inputMethodsName.length;i++){
 			for (int j=0;j<outputMethodsName.length;j++){
-				if (outputMethodsName[j].matches("(?s)(.*)"+inputMethodsName[i]+"(.*)") && hasBlock[j].trim().equals("yes")){
+				String[] inputMethodTokens = stringProcess(inputMethodsName[i]);
+				String[] outputMethodTokens = stringProcess(outputMethodsName[j]);
+				if (JaccardCoefficient.similarity(inputMethodTokens,outputMethodTokens)>0 && hasBlock[j].trim().equals("yes")){
 					if (scoreMethodsName[i]==0){
-						scoreMethodsName[i] = LevenshteinDistance(inputMethodsName[i],outputMethodsName[j]);
+						scoreMethodsName[i] = JaccardCoefficient.similarity(inputMethodTokens,outputMethodTokens);
 						if (inputMethodsType[i].equals(outputMethodsType[j])) scoreMethodsType[i]=1;
 					}else{
 						if (scoreMethodsType[i]==0){
 							if (inputMethodsType[i].equals(outputMethodsType[j])){
 								scoreMethodsType[i]=1;
-								scoreMethodsName[i] = LevenshteinDistance(inputMethodsName[i],outputMethodsName[j]);
+								scoreMethodsName[i] = JaccardCoefficient.similarity(inputMethodTokens,outputMethodTokens);
 							}else{
-								if (LevenshteinDistance(inputMethodsName[i],outputMethodsName[j])>scoreMethodsName[i]){
-									scoreMethodsName[i] = LevenshteinDistance(inputMethodsName[i],outputMethodsName[j]);
+								if (JaccardCoefficient.similarity(inputMethodTokens,outputMethodTokens)>scoreMethodsName[i]){
+									scoreMethodsName[i] = JaccardCoefficient.similarity(inputMethodTokens,outputMethodTokens);
 								}
 							}
 						}else{
 							if (inputMethodsType[i].equals(outputMethodsType[j])){
-								if (LevenshteinDistance(inputMethodsName[i],outputMethodsName[j])>scoreMethodsName[i]){
-									scoreMethodsName[i] = LevenshteinDistance(inputMethodsName[i],outputMethodsName[j]);
+								if (JaccardCoefficient.similarity(inputMethodTokens,outputMethodTokens)>scoreMethodsName[i]){
+									scoreMethodsName[i] = JaccardCoefficient.similarity(inputMethodTokens,outputMethodTokens);
 								}
 							}
 						}
@@ -153,8 +153,8 @@ public class Scorer {
 			}
 		}
 		
-		double[] score = new double[inputMethodsName.length];
-		for (int i=0;i<inputMethodsName.length;i++){
+		double[] score = new double[scoreMethodsName.length];
+		for (int i=0;i<scoreMethodsName.length;i++){
 			if (scoreMethodsType[i]==0) score[i]=scoreMethodsName[i]/2;
 			else score[i]=scoreMethodsName[i];
 		}
@@ -167,22 +167,15 @@ public class Scorer {
 		return score;
 	}
 		
-	public String stringProcess (String text) throws IOException{
+	public String[] stringProcess (String text) throws IOException{
 		String[] tokens = Tokenize(text);
 		tokens = removeStopWords(tokens);
-		tokens = stemming(tokens);
-		
-		text="";
-		for (int i=0;i<tokens.length;i++) text+=tokens[i];
-		
-		return text;
+			
+		return tokens;
 	}
 	public String[] Tokenize(String text) {
 		String[] tokens = text.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])");
 		for (int i=0;i<tokens.length;i++) tokens[i]=tokens[i].toLowerCase();
-		
-		// test results
-		//for (String a : tokens) System.out.println(a);
 		
 		return tokens;
 	}
@@ -190,65 +183,27 @@ public class Scorer {
 	public String[] removeStopWords(String[] tokens) throws IOException {
 		String input = new String(Files.readAllBytes(Paths.get("stopwords.txt")), "UTF-8");
 		String stopWords[] = input.split("\\n+");
+		int counter=0;
 		
 		for(int i=0;i<stopWords.length;i++){
 			for(int j=0;j<tokens.length;j++){
 				if (stopWords[i].trim().equals(tokens[j].trim())){
 					tokens[j]="";
+					counter++;
 				}
 			}
 		}
 		
-		//test results
-		//for (String a : tokens) System.out.println(a);
+		String[] finalTokens = new String[tokens.length-counter];
+		int i=0;
+		for(int j=0;j<tokens.length;j++){
+			if (!tokens[j].equals("")){
+				finalTokens[i]=tokens[j];
+				i++;
+			}
+		}
 		
-		return tokens;
-	}
-	
-	public String[] stemming (String[] terms) {
-	    PorterStemmer stemmer = new PorterStemmer();
-	    for(int i=0;i<terms.length;i++) terms[i]=stemmer.stem(terms[i]);
-	    return terms;
-	}
-	
-	public double LevenshteinDistance (CharSequence lhs, CharSequence rhs) {                          
-	    int len0 = lhs.length() + 1;                                                     
-	    int len1 = rhs.length() + 1;                                                     
-	                                                                                    
-	    // the array of distances                                                       
-	    int[] cost = new int[len0];                                                     
-	    int[] newcost = new int[len0];                                                  
-	                                                                                    
-	    // initial cost of skipping prefix in String s0                                 
-	    for (int i = 0; i < len0; i++) cost[i] = i;                                     
-	                                                                                    
-	    // dynamically computing the array of distances                                  
-	                                                                                    
-	    // transformation cost for each letter in s1                                    
-	    for (int j = 1; j < len1; j++) {                                                
-	        // initial cost of skipping prefix in String s1                             
-	        newcost[0] = j;                                                             
-	                                                                                    
-	        // transformation cost for each letter in s0                                
-	        for(int i = 1; i < len0; i++) {                                             
-	            // matching current letters in both strings                             
-	            int match = (lhs.charAt(i - 1) == rhs.charAt(j - 1)) ? 0 : 1;             
-	                                                                                    
-	            // computing cost for each transformation                               
-	            int cost_replace = cost[i - 1] + match;                                 
-	            int cost_insert  = cost[i] + 1;                                         
-	            int cost_delete  = newcost[i - 1] + 1;                                  
-	                                                                                    
-	            // keep minimum cost                                                    
-	            newcost[i] = Math.min(Math.min(cost_insert, cost_delete), cost_replace);
-	        }                                                                           
-	                                                                                    
-	        // swap cost/newcost arrays                                                 
-	        int[] swap = cost; cost = newcost; newcost = swap;                          
-	    }                                                                               
-	                                                                                    
-	    // the distance is the cost for transforming all letters in both strings 
-	    return 1-(cost[len0-1]*1.0/(len0+len1-2));                                                          
+		return finalTokens;
 	}
 	
 	public float TanimotoCoefficient(double[] features1, double[] features2) throws Exception {
@@ -263,7 +218,7 @@ public class Scorer {
         double b2 = 0.0;
 
         for (int i = 0; i < n; i++) {
-            ab += features1[i] * features2[i];
+            ab += features1[i]*features2[i];
             a2 += features1[i]*features1[i];
             b2 += features2[i]*features2[i];
         }
@@ -293,8 +248,6 @@ public class Scorer {
 				i+=counter-1;
 			}
 		}
-		
 		System.out.println(Arrays.toString(loc));
 	}
-		
 }

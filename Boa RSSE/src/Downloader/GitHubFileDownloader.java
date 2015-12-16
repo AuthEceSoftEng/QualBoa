@@ -120,7 +120,7 @@ public class GitHubFileDownloader {
 			str_temp = str_temp.substring(0,str_temp.indexOf('.'));
 			int_temp = Integer.parseInt(str_temp);
 			
-			if (int_temp>100) URL[i]="";
+			if (str_temp.matches("(?s)(.*)\\?\\?\\?\\?(.*)") || int_temp>100) URL[i]="";
 			else URL[i]=URL[i].substring(0,URL[i].indexOf(','));
 		}
 		return URL;

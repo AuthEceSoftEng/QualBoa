@@ -1,21 +1,8 @@
 package Downloader;
 
 public class Queries {	
-	public static String query_one(String a, String b){
-		
-		String query =  "p: Project = input;\n"+
-						"counts: output sum of int;\n"+
-
-						"visit(p, visitor {\n"+
-						"	before n: Project -> ifall (i: int; !match(`^java$`, lowercase(n.programming_languages[i]))) stop;\n"+
-						"	before node: CodeRepository ->\n"+
-						"	if (node.kind == RepositoryKind."+a+")\n"+
-						"		exists (j: int; yearof(node.revisions[j].commit_date) == "+b+")\n"+
-						"		counts << 1;\n"+
-						"});";
-		return query;
-	}
-	public static String query_two(String class_name, String method_names, String method_types){
+	
+	public static String query(String class_name, String method_names, String method_types){
 		
 		String query = "p: Project = input;\n"+
 						"Files: output top(150) of string weight float;\n"+

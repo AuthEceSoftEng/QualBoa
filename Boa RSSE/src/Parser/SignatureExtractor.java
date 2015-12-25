@@ -54,13 +54,8 @@ public class SignatureExtractor {
 	
 	public static void main(String[] args) throws IOException{
 		//test
-		//SignatureExtractor signature  = new SignatureExtractor("input.java");
+		//SignatureExtractor("input.java");
 		//SignatureExtractor signature2  = new SignatureExtractor("Files/sourceCode113.java",signature.getClassName());
-
-		//Files.write(Paths.get("className.txt"), className.getBytes());
-		//Files.write(Paths.get("methodNames.txt"), methodNames.getBytes());
-		//Files.write(Paths.get("methodTypes.txt"), methodTypes.getBytes());
-
 	}
 	public String getClassName() {return className;}
 	public String getMethodNames() {return methodNames;}
@@ -100,6 +95,8 @@ public class SignatureExtractor {
 				temp[i] = temp[i].substring(temp[i].indexOf("</Javadoc>"));
 			if (temp[i].matches("(?s)(.*)<MarkerAnnotation>(.*)"))
 				temp[i] = temp[i].substring(temp[i].indexOf("</MarkerAnnotation>"));
+			if (temp[i].matches("(?s)(.*)<SingleMemberAnnotation>(.*)"))
+				temp[i] = temp[i].substring(temp[i].indexOf("</SingleMemberAnnotation>"));
 			temp[i] = temp[i].substring(temp[i].indexOf("<SimpleName>")+12,temp[i].indexOf("</SimpleName>"));
 			if (temp[i].toLowerCase().matches("(?s)(.*)"+targetClassName.toLowerCase()+"(.*)")) className = "\""+temp[i]+"\"";
 		}
@@ -121,6 +118,8 @@ public class SignatureExtractor {
 					temp[i] = temp[i].substring(temp[i].indexOf("</Javadoc>"));
 				if (temp[i].matches("(?s)(.*)<MarkerAnnotation>(.*)"))
 					temp[i] = temp[i].substring(temp[i].indexOf("</MarkerAnnotation>"));
+				if (temp[i].matches("(?s)(.*)<SingleMemberAnnotation>(.*)"))
+					temp[i] = temp[i].substring(temp[i].indexOf("</SingleMemberAnnotation>"));
 				temp[i] = temp[i].substring(temp[i].indexOf("<SimpleName>")+12,temp[i].indexOf("</SimpleName>"));
 				if (temp[i].toLowerCase().matches("(?s)(.*)"+targetClassName.toLowerCase()+"(.*)")){
 					String temp2[] = ast.split("<TypeDeclaration>");
@@ -173,6 +172,8 @@ public class SignatureExtractor {
 					temp[i] = temp[i].substring(temp[i].indexOf("</Javadoc>"));
 				if (temp[i].matches("(?s)(.*)<MarkerAnnotation>(.*)"))
 					temp[i] = temp[i].substring(temp[i].indexOf("</MarkerAnnotation>"));
+				if (temp[i].matches("(?s)(.*)<SingleMemberAnnotation>(.*)"))
+					temp[i] = temp[i].substring(temp[i].indexOf("</SingleMemberAnnotation>"));
 				temp[i] = temp[i].substring(temp[i].indexOf("<SimpleName>")+12,temp[i].indexOf("</SimpleName>"));
 				if (temp[i].toLowerCase().matches("(?s)(.*)"+targetClassName.toLowerCase()+"(.*)")){
 					String temp2[] = ast.split("<TypeDeclaration>");

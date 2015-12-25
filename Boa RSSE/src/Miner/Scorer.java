@@ -1,6 +1,7 @@
 package Miner;
 
 import java.io.IOException;
+//import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -12,7 +13,19 @@ import java.io.File;
 import model.LOCcounter;
 
 public class Scorer {
+	private String[] results;
+	
+	public String[] getResults(){return results;}
+	
 	public static void main(String[] args) throws Exception{
+		//testing
+		Scorer scorer = new Scorer();
+		String[] results = scorer.getResults();
+		//print top 10
+		System.out.println("Top 10 recommended results: \n");
+		for (int i=0;i<10;i++)System.out.println("\n"+(i+1)+"."+"\n\n"+results[i]);
+	}
+	public Scorer() throws Exception{
 		//retrieve the files
 		String[] path = new File("Files").list();
 		String[] fileContents = new String[path.length];
@@ -20,9 +33,6 @@ public class Scorer {
 		for (int i=0;i<path.length;i++){
 			fileContents[i] = new String(Files.readAllBytes(Paths.get("Files/"+path[i])), "UTF-8");
 		}
-		
-		//initiate a scorer object
-		Scorer scorer = new Scorer();
 		
 		//extract Signatures
 		SignatureExtractor inputSignature  = new SignatureExtractor("input.java");
@@ -33,7 +43,7 @@ public class Scorer {
 		for (int i=0;i<path.length;i++){
 			System.out.println(path[i]);
 			outputSignature[i] = new SignatureExtractor("Files/"+path[i],inputSignature.getClassName());
-			score[i] = scorer.calculateScore(inputSignature,outputSignature[i]);
+			score[i] = calculateScore(inputSignature,outputSignature[i]);
 		}
 		System.out.println(Arrays.toString(score));
 		
@@ -50,12 +60,13 @@ public class Scorer {
 		}
 	
 		//post process (sort equalities based on LOC)
-		scorer.postProcessor(fileContents,score);
+		postProcessor(fileContents,score);
 		
 		//rewrite the files after the final sorting
 		for (int i=0;i<fileContents.length;i++){
 			Files.write(Paths.get("Final_Files/finalSourceCode"+(i+1)+".java"), fileContents[i].getBytes());
 		}
+		results=fileContents;
 	}
 	
 	public float calculateScore(SignatureExtractor inputSignature,SignatureExtractor outputSignature) throws Exception{

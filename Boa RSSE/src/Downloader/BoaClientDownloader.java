@@ -9,31 +9,37 @@ import Parser.SignatureExtractor;
 import edu.iastate.cs.boa.*;
 
 public class BoaClientDownloader {
+	private String boaUsername;
+	private String boaPassword;
 
+	public BoaClientDownloader(String boaUser, String boaPass){
+		boaUsername=boaUser;
+		boaPassword=boaPass;
+	}
+	
 	public static void main(String[] args) throws BoaException, IOException {
-
-		//Test Query
-		SignatureExtractor signature  = new SignatureExtractor("input.java");
+		//test this class
+		BoaClientDownloader boaDownloader = new BoaClientDownloader(PropertiesHandler.BoaUsername, PropertiesHandler.BoaPassword);
+		boaDownloader.runQuery("input.java");
+	}
+	public void runQuery(String path) throws BoaException, IOException {
+		SignatureExtractor signature  = new SignatureExtractor(path);
 		
 		String className = signature.getClassName();
 		String methodNames = signature.getMethodNames();
 		String methodTypes = signature.getMethodTypes();
 		
-		//Files.write(Paths.get("inputClassName.txt"), className.getBytes());
-		//Files.write(Paths.get("inputMethodNames.txt"), methodNames.getBytes());
-		//Files.write(Paths.get("inputMethodTypes.txt"), methodTypes.getBytes());
-		
-		String query = Queries.query_two(className,methodNames,methodTypes);
+		String query = Queries.query(className,methodNames,methodTypes);
 		Files.write(Paths.get("Query.txt"), query.getBytes());
 		
 		try (final BoaClient client = new BoaClient()) {
-			client.login(PropertiesHandler.BoaUsername,PropertiesHandler.BoaPassword);	
+			client.login(boaUsername,boaPassword);	
 			try{
 				// print all available input datasets
 				//for (final InputHandle d : client.getDatasets())
 				//	System.out.println(d);
 				
-				InputHandle d = client.getDataset("2015 September/GitHub (medium)");									
+				InputHandle d = client.getDataset("2015 September/GitHub (small)");									
 				JobHandle JobOutput = client.query(query,d);
 				String output = waitAndGetOutput(JobOutput);
 				
@@ -46,7 +52,7 @@ public class BoaClientDownloader {
 		}
 	}
 	
-	public static String waitAndGetOutput(JobHandle JobOutput){
+	public String waitAndGetOutput(JobHandle JobOutput){
 		String output = new String();
 		try{
 			while (true){

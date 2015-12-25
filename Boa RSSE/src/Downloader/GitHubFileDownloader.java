@@ -126,27 +126,29 @@ public class GitHubFileDownloader {
 		return URL;
 	}
 	
-	/**
-	 * This main function is used as a test function for the GitHub downloader.
-	 */
-	public static void main(String args[]) throws IOException {
-		// Input here your GitHub username and password
-		// Note that if the response code is 401, it means you provided a wrong username or password
-		GitHubFileDownloader gitHubDownloader = new GitHubFileDownloader(PropertiesHandler.GitHubUsername, PropertiesHandler.GitHubPassword);
-
-		String[] URL = gitHubDownloader.splitInput("Boa_output.txt");
+	public void downloadFiles(String path) throws IOException{
+		String[] URL = splitInput(path);
 
 		// Create the Files directory if it does not exist
 		if (!Files.exists(Paths.get("Files")))
 		    Files.createDirectories(Paths.get("Files"));
 		for(int i=0; i < URL.length;i++){
 			if (!URL[i].equals("")){
-				String fileContents = gitHubDownloader.downloadFile(URL[i]);
+				String fileContents = downloadFile(URL[i]);
 				if (fileContents != null) {
 					Files.write(Paths.get("Files/sourceCode"+(i+1)+".java"), fileContents.getBytes());
 				}
 			}
 		}
 		System.out.println("done");
+	}
+	
+	/**
+	 * This main function is used as a test function for the GitHub downloader.
+	 */
+	public static void main(String args[]) throws IOException {
+		// test it
+		GitHubFileDownloader gitHubDownloader = new GitHubFileDownloader(PropertiesHandler.GitHubUsername, PropertiesHandler.GitHubPassword);
+		gitHubDownloader.downloadFiles("Boa_output.txt");
 	}
 }

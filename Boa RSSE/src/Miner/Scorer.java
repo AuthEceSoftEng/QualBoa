@@ -79,7 +79,7 @@ public class Scorer {
 		for(int i=0;i<methodScore.length;i++) scoreVector[i+1]=methodScore[i];
 		for(int i=0;i<defaultVector.length;i++) defaultVector[i]=1;
 		
-		float score = TanimotoCoefficient(defaultVector,scoreVector);
+		float score = TanimotoCoefficient.similarity(defaultVector,scoreVector);
 		
 		//test results
 		System.out.println(Arrays.toString(defaultVector));
@@ -217,25 +217,6 @@ public class Scorer {
 		return finalTokens;
 	}
 	
-	public float TanimotoCoefficient(double[] features1, double[] features2) throws Exception {
-
-        if (features1.length != features2.length) {
-            throw new Exception("Features vectors must be of the same length");
-        }
-
-        int n = features1.length;
-        double ab = 0.0;
-        double a2 = 0.0;
-        double b2 = 0.0;
-
-        for (int i = 0; i < n; i++) {
-            ab += features1[i]*features2[i];
-            a2 += features1[i]*features1[i];
-            b2 += features2[i]*features2[i];
-        }
-        return (float)ab/(float)(a2+b2-ab);
-    }
-
 	public void postProcessor(String[] fileContents,float[] score){
 		LOCcounter loccounter = new LOCcounter();
 		float[] loc= new float[fileContents.length];

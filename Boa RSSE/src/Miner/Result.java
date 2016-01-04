@@ -22,7 +22,7 @@ public class Result {
 	}
 
 	public String toPrint() {
-		return path + "   " + score;
+		return path + "   " + score + "   " + loc;
 	}
 
 }

@@ -1,7 +1,5 @@
 package Miner;
 
-import java.io.IOException;
-// import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -84,8 +82,8 @@ public class Scorer {
 		results = fileContents;
 	}
 
-	public float calculateScore(Signature inputSignature, Signature outputSignature) throws Exception {
-		double classScore = stackNameScore(inputSignature.getClassName(), outputSignature.getClassName());
+	public float calculateScore(Signature inputSignature, Signature outputSignature) {
+		double classScore = classNameScore(inputSignature.getClassName(), outputSignature.getClassName());
 		double[] methodScore = methodsScore(inputSignature, outputSignature);
 		double[] scoreVector = new double[methodScore.length + 1];
 		double[] defaultVector = new double[methodScore.length + 1];
@@ -106,26 +104,26 @@ public class Scorer {
 		return score;
 	}
 
-	public double stackNameScore(String inputStack, String outputStack) throws IOException {
-		inputStack = inputStack.replace("\"", "");
-		outputStack = outputStack.replace("\"", "");
+	public double classNameScore(String inputClass, String outputClass) {
+		inputClass = inputClass.replace("\"", "");
+		outputClass = outputClass.replace("\"", "");
 
-		if (inputStack.trim().equals("-1"))
+		if (inputClass.trim().equals("-1"))
 			return 1.0;
 
-		String[] inputStackTokens = stringProcess(inputStack);
-		String[] outputStackTokens = stringProcess(outputStack);
+		String[] inputClassTokens = stringProcess(inputClass);
+		String[] outputClassTokens = stringProcess(outputClass);
 
-		double score = JaccardCoefficient.similarity(inputStackTokens, outputStackTokens);
+		double score = JaccardCoefficient.similarity(inputClassTokens, outputClassTokens);
 
 		// test results
-		System.out.println("final:" + inputStack);
-		System.out.println("final:" + outputStack);
+		System.out.println("final:" + inputClass);
+		System.out.println("final:" + outputClass);
 		// System.out.println(score);
 		return score;
 	}
 
-	public double[] methodsScore(Signature inputSignature, Signature outputSignature) throws IOException {
+	public double[] methodsScore(Signature inputSignature, Signature outputSignature) {
 		String inputMethodName = inputSignature.getMethodNames();
 		String inputMethodType = inputSignature.getMethodTypes();
 		String outputMethodName = outputSignature.getMethodNames();
@@ -207,45 +205,11 @@ public class Scorer {
 		return score;
 	}
 
-	public String[] stringProcess(String text) throws IOException {
-		String[] tokens = Tokenize(text);
-		tokens = removeStopWords(tokens);
+	public String[] stringProcess(String text) {
+		String[] tokens = StringProcessing.tokenize(text);
+		tokens = StringProcessing.removeStopWords(tokens);
 
 		return tokens;
-	}
-
-	public String[] Tokenize(String text) {
-		String[] tokens = text.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])");
-		for (int i = 0; i < tokens.length; i++)
-			tokens[i] = tokens[i].toLowerCase();
-
-		return tokens;
-	}
-
-	public String[] removeStopWords(String[] tokens) throws IOException {
-		String input = new String(Files.readAllBytes(Paths.get("stopwords.txt")), "UTF-8");
-		String stopWords[] = input.split("\\n+");
-		int counter = 0;
-
-		for (int i = 0; i < stopWords.length; i++) {
-			for (int j = 0; j < tokens.length; j++) {
-				if (stopWords[i].trim().equals(tokens[j].trim())) {
-					tokens[j] = "";
-					counter++;
-				}
-			}
-		}
-
-		String[] finalTokens = new String[tokens.length - counter];
-		int i = 0;
-		for (int j = 0; j < tokens.length; j++) {
-			if (!tokens[j].equals("")) {
-				finalTokens[i] = tokens[j];
-				i++;
-			}
-		}
-
-		return finalTokens;
 	}
 
 }

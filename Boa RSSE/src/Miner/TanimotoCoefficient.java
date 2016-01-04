@@ -2,10 +2,10 @@ package Miner;
 
 public class TanimotoCoefficient {
 
-	public static float similarity(double[] features1, double[] features2) throws Exception {
+	public static float similarity(double[] features1, double[] features2) {
 
 		if (features1.length != features2.length) {
-			throw new Exception("Features vectors must be of the same length");
+			throw new IllegalArgumentException("Feature vectors must be of the same length");
 		}
 
 		int n = features1.length;

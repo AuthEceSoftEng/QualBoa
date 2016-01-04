@@ -5,7 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import Main.PropertiesHandler;
-import Parser.SignatureExtractor;
+import Parser.Signature;
 import edu.iastate.cs.boa.*;
 
 public class BoaClientDownloader {
@@ -23,7 +23,9 @@ public class BoaClientDownloader {
 		boaDownloader.runQuery("input.java");
 	}
 	public void runQuery(String path) throws BoaException, IOException {
-		SignatureExtractor signature  = new SignatureExtractor(path);
+		// get the signature of the file
+		String content = new String(Files.readAllBytes(Paths.get(path)), "UTF-8");
+		Signature signature  = new Signature(content);
 		
 		String className = signature.getClassName();
 		String methodNames = signature.getMethodNames();

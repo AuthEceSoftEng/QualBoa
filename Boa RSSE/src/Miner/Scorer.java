@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 
-import Parser.SignatureExtractor;
+import Parser.Signature;
 
 import java.io.File;
 
@@ -38,7 +38,9 @@ public class Scorer {
 		ArrayList<Result> fileContents = new ArrayList<Result>();
 
 		// for each result
-		SignatureExtractor inputSignature = new SignatureExtractor("input.java");
+		// get the signature of the file
+		String inputContent = new String(Files.readAllBytes(Paths.get("input.java")), "UTF-8");
+		Signature inputSignature = new Signature(inputContent);
 		for (int i = 0; i < path.length; i++) {
 			System.out.println(path[i]);
 
@@ -46,8 +48,7 @@ public class Scorer {
 			String content = new String(Files.readAllBytes(Paths.get("Files/" + path[i])), "UTF-8");
 
 			// extract signature
-			SignatureExtractor outputSignature = new SignatureExtractor("Files/" + path[i],
-					inputSignature.getClassName());
+			Signature outputSignature = new Signature(content, inputSignature.getClassName());
 
 			// calculate the score
 			double score = calculateScore(inputSignature, outputSignature);
@@ -83,8 +84,7 @@ public class Scorer {
 		results = fileContents;
 	}
 
-	public float calculateScore(SignatureExtractor inputSignature, SignatureExtractor outputSignature)
-			throws Exception {
+	public float calculateScore(Signature inputSignature, Signature outputSignature) throws Exception {
 		double classScore = stackNameScore(inputSignature.getClassName(), outputSignature.getClassName());
 		double[] methodScore = methodsScore(inputSignature, outputSignature);
 		double[] scoreVector = new double[methodScore.length + 1];
@@ -125,8 +125,7 @@ public class Scorer {
 		return score;
 	}
 
-	public double[] methodsScore(SignatureExtractor inputSignature, SignatureExtractor outputSignature)
-			throws IOException {
+	public double[] methodsScore(Signature inputSignature, Signature outputSignature) throws IOException {
 		String inputMethodName = inputSignature.getMethodNames();
 		String inputMethodType = inputSignature.getMethodTypes();
 		String outputMethodName = outputSignature.getMethodNames();

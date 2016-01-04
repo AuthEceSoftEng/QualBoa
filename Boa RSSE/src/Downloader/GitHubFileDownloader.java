@@ -9,9 +9,12 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 import javax.xml.bind.DatatypeConverter;
 
+import Database.DownloadedFile;
+import Database.FileHandler;
 import Main.PropertiesHandler;
 
 /**
@@ -107,48 +110,50 @@ public class GitHubFileDownloader {
 		}
 		return null;
 	}
-	
+
 	public String[] splitInput(String path) throws IOException {
 		String input = new String(Files.readAllBytes(Paths.get(path)), "UTF-8");
 		String str_temp = "";
 		int int_temp;
-		
+
 		input = input.replace("Files[] = ", "");
 		String[] URL = input.split("\\n+");
-		for(int i=0; i < URL.length;i++){
-			str_temp = URL[i].substring(URL[i].indexOf(',')+2);
-			str_temp = str_temp.substring(0,str_temp.indexOf('.'));
+		for (int i = 0; i < URL.length; i++) {
+			str_temp = URL[i].substring(URL[i].indexOf(',') + 2);
+			str_temp = str_temp.substring(0, str_temp.indexOf('.'));
 			int_temp = Integer.parseInt(str_temp);
-			
-			if (str_temp.matches("(?s)(.*)\\?\\?\\?\\?(.*)") || int_temp>100) URL[i]="";
-			else URL[i]=URL[i].substring(0,URL[i].indexOf(','));
+
+			if (str_temp.matches("(?s)(.*)\\?\\?\\?\\?(.*)") || int_temp > 100)
+				URL[i] = "";
+			else
+				URL[i] = URL[i].substring(0, URL[i].indexOf(','));
 		}
 		return URL;
 	}
-	
-	public void downloadFiles(String path) throws IOException{
-		String[] URL = splitInput(path);
 
-		// Create the Files directory if it does not exist
-		if (!Files.exists(Paths.get("Files")))
-		    Files.createDirectories(Paths.get("Files"));
-		for(int i=0; i < URL.length;i++){
-			if (!URL[i].equals("")){
+	public ArrayList<DownloadedFile> downloadFiles(String path, FileHandler fileHandler) throws IOException {
+		ArrayList<DownloadedFile> files = new ArrayList<DownloadedFile>();
+		String[] URL = splitInput(path);
+		for (int i = 0; i < URL.length; i++) {
+			if (!URL[i].equals("")) {
 				String fileContents = downloadFile(URL[i]);
 				if (fileContents != null) {
-					Files.write(Paths.get("Files/sourceCode"+(i+1)+".java"), fileContents.getBytes());
+					files.add(new DownloadedFile(URL[i].toString(), fileContents));
+					if (fileHandler != null)
+						fileHandler.writeFile("file" + i + ".java", files.get(files.size() - 1));
 				}
 			}
 		}
-		System.out.println("done");
+		return files;
 	}
-	
+
 	/**
 	 * This main function is used as a test function for the GitHub downloader.
 	 */
 	public static void main(String args[]) throws IOException {
 		// test it
-		GitHubFileDownloader gitHubDownloader = new GitHubFileDownloader(PropertiesHandler.GitHubUsername, PropertiesHandler.GitHubPassword);
-		gitHubDownloader.downloadFiles("Boa_output.txt");
+		GitHubFileDownloader gitHubDownloader = new GitHubFileDownloader(PropertiesHandler.GitHubUsername,
+				PropertiesHandler.GitHubPassword);
+		gitHubDownloader.downloadFiles("Boa_output.txt", new FileHandler("Files"));
 	}
 }

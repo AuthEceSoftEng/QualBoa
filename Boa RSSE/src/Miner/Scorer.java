@@ -1,15 +1,17 @@
 package Miner;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 
+import Database.DownloadedFile;
+import Database.FileHandler;
 import Parser.Signature;
-
-import java.io.File;
 
 import model.LOCcounter;
 
@@ -22,7 +24,7 @@ public class Scorer {
 
 	public static void main(String[] args) throws Exception {
 		// testing
-		Scorer scorer = new Scorer();
+		Scorer scorer = new Scorer(new FileHandler("Files"), new FileHandler("Final_Files"));
 		ArrayList<Result> results = scorer.getResults();
 		// print top 10
 		System.out.println("Top 10 recommended results: \n");
@@ -30,20 +32,20 @@ public class Scorer {
 			System.out.println("\n" + (i + 1) + "." + "\n\n" + results.get(i));
 	}
 
-	public Scorer() throws Exception {
-		// retrieve the files
-		String[] path = new File("Files").list();
+	public Scorer(FileHandler fileHandler, FileHandler resultFileHandler) throws Exception {
+		this(fileHandler.readAllFiles(), resultFileHandler);
+	}
+
+	public Scorer(ArrayList<DownloadedFile> files, FileHandler resultFileHandler) throws IOException {
 		ArrayList<Result> fileContents = new ArrayList<Result>();
 
 		// for each result
 		// get the signature of the file
 		String inputContent = new String(Files.readAllBytes(Paths.get("input.java")), "UTF-8");
 		Signature inputSignature = new Signature(inputContent);
-		for (int i = 0; i < path.length; i++) {
-			System.out.println(path[i]);
-
+		for (DownloadedFile file : files) {
 			// get the content of the file
-			String content = new String(Files.readAllBytes(Paths.get("Files/" + path[i])), "UTF-8");
+			String content = file.getContent();
 
 			// extract signature
 			Signature outputSignature = new Signature(content, inputSignature.getClassName());
@@ -53,9 +55,9 @@ public class Scorer {
 
 			// count the lines of code
 			LOCcounter loccounter = new LOCcounter();
-			float loc = (float) loccounter.getLinesInFile("Files/" + path[i]);
+			float loc = (float) loccounter.getLinesInFile(new BufferedReader(new StringReader(content)));
 
-			fileContents.add(new Result(content, score, loc));
+			fileContents.add(new Result(file.getPath(), content, score, loc));
 		}
 
 		// sort the results in descending order (equalities are sorted based on LOC)
@@ -70,16 +72,13 @@ public class Scorer {
 					return o1.loc < o2.loc ? -1 : o1.loc > o2.loc ? 1 : 0;
 			}
 		});
-
-		// Create the Final_Files directory if it does not exist and write the files sorted
-		if (!Files.exists(Paths.get("Final_Files")))
-			Files.createDirectories(Paths.get("Final_Files"));
-
-		for (int i = 0; i < fileContents.size(); i++) {
-			Files.write(Paths.get("Final_Files/finalSourceCode" + (i + 1) + ".java"),
-					fileContents.get(i).content.getBytes());
-		}
 		results = fileContents;
+		if (resultFileHandler != null) {
+			for (int i = 0; i < results.size(); i++) {
+				Result result = results.get(i);
+				resultFileHandler.writeFile("result" + i + ".java", result);
+			}
+		}
 	}
 
 	public float calculateScore(Signature inputSignature, Signature outputSignature) {
@@ -97,9 +96,9 @@ public class Scorer {
 		float score = TanimotoCoefficient.similarity(defaultVector, scoreVector);
 
 		// test results
-		System.out.println(Arrays.toString(defaultVector));
-		System.out.println(Arrays.toString(scoreVector));
-		System.out.println(score);
+		// System.out.println(Arrays.toString(defaultVector));
+		// System.out.println(Arrays.toString(scoreVector));
+		// System.out.println(score);
 
 		return score;
 	}
@@ -117,8 +116,8 @@ public class Scorer {
 		double score = JaccardCoefficient.similarity(inputClassTokens, outputClassTokens);
 
 		// test results
-		System.out.println("final:" + inputClass);
-		System.out.println("final:" + outputClass);
+		// System.out.println("final:" + inputClass);
+		// System.out.println("final:" + outputClass);
 		// System.out.println(score);
 		return score;
 	}

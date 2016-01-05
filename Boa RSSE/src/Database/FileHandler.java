@@ -1,8 +1,12 @@
 package Database;
 
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 
 import Miner.Result;
@@ -14,16 +18,36 @@ public class FileHandler {
 	protected String resultsPath;
 
 	public FileHandler(String rootPath) {
+		this(rootPath, false);
+	}
+
+	public FileHandler(String rootPath, boolean removeExistingFolder) {
+		if (removeExistingFolder) {
+			try {
+				Files.walkFileTree(Paths.get(rootPath), new SimpleFileVisitor<Path>() {
+					@Override
+					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+						Files.delete(file);
+						return FileVisitResult.CONTINUE;
+					}
+
+					@Override
+					public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+						Files.delete(dir);
+						return FileVisitResult.CONTINUE;
+					}
+				});
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		this.rootPath = rootPath + "/";
 		downloadedFilesPath = this.rootPath + "DownloadedFiles/";
 		resultsPath = this.rootPath + "Results/";
 		try {
-			if (!Files.exists(Paths.get(this.rootPath)))
-				Files.createDirectories(Paths.get(this.rootPath));
-			if (!Files.exists(Paths.get(downloadedFilesPath)))
-				Files.createDirectories(Paths.get(downloadedFilesPath));
-			if (!Files.exists(Paths.get(resultsPath)))
-				Files.createDirectories(Paths.get(resultsPath));
+			Files.createDirectories(Paths.get(this.rootPath));
+			Files.createDirectories(Paths.get(downloadedFilesPath));
+			Files.createDirectories(Paths.get(resultsPath));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

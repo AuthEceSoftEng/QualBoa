@@ -24,7 +24,7 @@ public class Scorer {
 
 	public static void main(String[] args) throws Exception {
 		// testing
-		Scorer scorer = new Scorer(new FileHandler("Files"), new FileHandler("Final_Files"));
+		Scorer scorer = new Scorer(new FileHandler("Files"));
 		ArrayList<Result> results = scorer.getResults();
 		// print top 10
 		System.out.println("Top 10 recommended results: \n");
@@ -32,11 +32,11 @@ public class Scorer {
 			System.out.println("\n" + (i + 1) + "." + "\n\n" + results.get(i));
 	}
 
-	public Scorer(FileHandler fileHandler, FileHandler resultFileHandler) throws Exception {
-		this(fileHandler.readAllFiles(), resultFileHandler);
+	public Scorer(FileHandler fileHandler) throws Exception {
+		this(fileHandler.readAllDownloadedFiles());
 	}
 
-	public Scorer(ArrayList<DownloadedFile> files, FileHandler resultFileHandler) throws IOException {
+	public Scorer(ArrayList<DownloadedFile> files) throws IOException {
 		ArrayList<Result> fileContents = new ArrayList<Result>();
 
 		// for each result
@@ -73,12 +73,6 @@ public class Scorer {
 			}
 		});
 		results = fileContents;
-		if (resultFileHandler != null) {
-			for (int i = 0; i < results.size(); i++) {
-				Result result = results.get(i);
-				resultFileHandler.writeFile("result" + i + ".java", result);
-			}
-		}
 	}
 
 	public float calculateScore(Signature inputSignature, Signature outputSignature) {

@@ -7,14 +7,11 @@ import java.net.ConnectException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import javax.xml.bind.DatatypeConverter;
 
 import Database.DownloadedFile;
-import Database.FileHandler;
 import Main.PropertiesHandler;
 
 /**
@@ -111,8 +108,7 @@ public class GitHubFileDownloader {
 		return null;
 	}
 
-	public String[] splitInput(String path) throws IOException {
-		String input = new String(Files.readAllBytes(Paths.get(path)), "UTF-8");
+	public String[] splitInput(String input) {
 		String str_temp = "";
 		int int_temp;
 
@@ -131,16 +127,14 @@ public class GitHubFileDownloader {
 		return URL;
 	}
 
-	public ArrayList<DownloadedFile> downloadFiles(String path, FileHandler fileHandler) throws IOException {
+	public ArrayList<DownloadedFile> downloadFiles(String input) throws IOException {
 		ArrayList<DownloadedFile> files = new ArrayList<DownloadedFile>();
-		String[] URL = splitInput(path);
+		String[] URL = splitInput(input);
 		for (int i = 0; i < URL.length; i++) {
 			if (!URL[i].equals("")) {
 				String fileContents = downloadFile(URL[i]);
 				if (fileContents != null) {
 					files.add(new DownloadedFile(URL[i].toString(), fileContents));
-					if (fileHandler != null)
-						fileHandler.writeFile("file" + i + ".java", files.get(files.size() - 1));
 				}
 			}
 		}
@@ -154,6 +148,6 @@ public class GitHubFileDownloader {
 		// test it
 		GitHubFileDownloader gitHubDownloader = new GitHubFileDownloader(PropertiesHandler.GitHubUsername,
 				PropertiesHandler.GitHubPassword);
-		gitHubDownloader.downloadFiles("Boa_output.txt", new FileHandler("Files"));
+		gitHubDownloader.downloadFiles("Boa_output.txt");
 	}
 }

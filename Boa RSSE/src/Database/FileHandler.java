@@ -9,52 +9,101 @@ import Miner.Result;
 
 public class FileHandler {
 
-	private String filesPath;
+	private String rootPath;
+	protected String downloadedFilesPath;
+	protected String resultsPath;
 
-	public FileHandler(String filesPath) {
-		this.filesPath = filesPath;
-		if (!Files.exists(Paths.get(filesPath))) {
-			try {
-				Files.createDirectories(Paths.get(filesPath));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+	public FileHandler(String rootPath) {
+		this.rootPath = rootPath + "/";
+		downloadedFilesPath = this.rootPath + "DownloadedFiles/";
+		resultsPath = this.rootPath + "Results/";
+		try {
+			if (!Files.exists(Paths.get(this.rootPath)))
+				Files.createDirectories(Paths.get(this.rootPath));
+			if (!Files.exists(Paths.get(downloadedFilesPath)))
+				Files.createDirectories(Paths.get(downloadedFilesPath));
+			if (!Files.exists(Paths.get(resultsPath)))
+				Files.createDirectories(Paths.get(resultsPath));
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
-	public void writeFile(String filename, Result result) {
-		writeFile(filename, result.toString());
+	private String readFileFromPath(String path) {
+		String content = "";
+		try {
+			content = new String(Files.readAllBytes(Paths.get(path)), "UTF-8");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return content;
 	}
 
-	public void writeFile(String filename, DownloadedFile file) {
-		writeFile(filename, file.toString());
+	private void writeFileToPath(String path, String content) {
+		try {
+			Files.write(Paths.get(path), content.getBytes());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public String readFile(String filename) {
+		return readFileFromPath(rootPath + filename);
 	}
 
 	public void writeFile(String filename, String content) {
-		try {
-			Files.write(Paths.get(filesPath + "/" + filename), content.getBytes());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		writeFileToPath(rootPath + filename, content);
 	}
 
-	public DownloadedFile readFile(String filename) {
-		String content = "";
-		try {
-			content = new String(Files.readAllBytes(Paths.get(filesPath + "/" + filename)), "UTF-8");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		String path = content.split("\\n_________________________________\\n")[0];
-		content = content.split("\\n_________________________________\\n")[1];
+	public DownloadedFile readDownloadedFile(String filename) {
+		String fullcontent = readFileFromPath(downloadedFilesPath + filename);
+		String path = fullcontent.split("\\n_________________________________\\n")[0];
+		String content = fullcontent.split("\\n_________________________________\\n")[1];
 		return new DownloadedFile(path, content);
 	}
 
-	public ArrayList<DownloadedFile> readAllFiles() {
+	public void writeDownloadedFile(String filename, DownloadedFile file) {
+		writeFileToPath(downloadedFilesPath + filename, file.toString());
+	}
+
+	public Result readResult(String filename) {
+		String fullcontent = readFileFromPath(resultsPath + filename);
+		String path = fullcontent.split("\\n_________________________________\\n")[0];
+		String content = fullcontent.split("\\n_________________________________\\n")[1];
+		String score = fullcontent.split("\\n_________________________________\\n")[1];
+		String loc = fullcontent.split("\\n_________________________________\\n")[1];
+		return new Result(path, content, Double.parseDouble(score), Float.parseFloat(loc));
+	}
+
+	public void writeResult(String filename, Result result) {
+		writeFileToPath(resultsPath + filename, result.toString());
+	}
+
+	public ArrayList<DownloadedFile> readAllDownloadedFiles() {
 		ArrayList<DownloadedFile> files = new ArrayList<DownloadedFile>();
-		for (String filename : new java.io.File(filesPath).list()) {
-			files.add(readFile(filename));
+		for (String filename : new java.io.File(downloadedFilesPath).list()) {
+			files.add(readDownloadedFile(filename));
 		}
 		return files;
+	}
+
+	public void writeAllDownloadedFiles(ArrayList<DownloadedFile> files) {
+		for (int i = 0; i < files.size(); i++) {
+			writeDownloadedFile("file" + i + ".java", files.get(i));
+		}
+	}
+
+	public ArrayList<Result> readAllResults() {
+		ArrayList<Result> results = new ArrayList<Result>();
+		for (String filename : new java.io.File(resultsPath).list()) {
+			results.add(readResult(filename));
+		}
+		return results;
+	}
+
+	public void writeAllResults(ArrayList<Result> results) {
+		for (int i = 0; i < results.size(); i++) {
+			writeResult("result" + i + ".java", results.get(i));
+		}
 	}
 }

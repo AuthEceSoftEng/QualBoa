@@ -12,7 +12,6 @@ import java.util.Comparator;
 import Database.DownloadedFile;
 import Database.FileHandler;
 import Parser.Signature;
-
 import model.LOCcounter;
 
 public class Scorer {
@@ -24,7 +23,8 @@ public class Scorer {
 
 	public static void main(String[] args) throws Exception {
 		// testing
-		Scorer scorer = new Scorer(new FileHandler("Files"));
+		String inputContent = new String(Files.readAllBytes(Paths.get("input.java")), "UTF-8");
+		Scorer scorer = new Scorer(inputContent, new FileHandler("Files"));
 		ArrayList<Result> results = scorer.getResults();
 		// print top 10
 		System.out.println("Top 10 recommended results: \n");
@@ -32,16 +32,15 @@ public class Scorer {
 			System.out.println("\n" + (i + 1) + "." + "\n\n" + results.get(i));
 	}
 
-	public Scorer(FileHandler fileHandler) throws Exception {
-		this(fileHandler.readAllDownloadedFiles());
+	public Scorer(String inputContent, FileHandler fileHandler) throws Exception {
+		this(inputContent, fileHandler.readAllDownloadedFiles());
 	}
 
-	public Scorer(ArrayList<DownloadedFile> files) throws IOException {
+	public Scorer(String inputContent, ArrayList<DownloadedFile> files) throws IOException {
 		ArrayList<Result> fileContents = new ArrayList<Result>();
 
 		// for each result
 		// get the signature of the file
-		String inputContent = new String(Files.readAllBytes(Paths.get("input.java")), "UTF-8");
 		Signature inputSignature = new Signature(inputContent);
 		for (DownloadedFile file : files) {
 			// get the content of the file
@@ -161,16 +160,14 @@ public class Scorer {
 								scoreMethodsName[i] = JaccardCoefficient.similarity(inputMethodTokens,
 										outputMethodTokens);
 							} else {
-								if (JaccardCoefficient.similarity(inputMethodTokens,
-										outputMethodTokens) > scoreMethodsName[i]) {
+								if (JaccardCoefficient.similarity(inputMethodTokens, outputMethodTokens) > scoreMethodsName[i]) {
 									scoreMethodsName[i] = JaccardCoefficient.similarity(inputMethodTokens,
 											outputMethodTokens);
 								}
 							}
 						} else {
 							if (inputMethodsType[i].equals(outputMethodsType[j])) {
-								if (JaccardCoefficient.similarity(inputMethodTokens,
-										outputMethodTokens) > scoreMethodsName[i]) {
+								if (JaccardCoefficient.similarity(inputMethodTokens, outputMethodTokens) > scoreMethodsName[i]) {
 									scoreMethodsName[i] = JaccardCoefficient.similarity(inputMethodTokens,
 											outputMethodTokens);
 								}

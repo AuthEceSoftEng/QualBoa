@@ -43,7 +43,7 @@ public class Recommender {
 		// ArrayList<DownloadedFile> files = fileHandler.readAllDownloadedFiles();
 
 		// Score the files
-		Scorer scorer = new Scorer(files);
+		Scorer scorer = new Scorer(queryInJava, files);
 		ArrayList<Result> results = scorer.getResults();
 		if (useFileHandler)
 			fileHandler.writeAllResults(results);

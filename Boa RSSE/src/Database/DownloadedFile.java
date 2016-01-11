@@ -10,9 +10,13 @@ public class DownloadedFile {
 		this.content = content;
 	}
 
+	public String serialize() {
+		return path + "\n_________________________________\n" + content;
+	}
+
 	@Override
 	public String toString() {
-		return path + "\n_________________________________\n" + content;
+		return path;
 	}
 
 	public String getContent() {

@@ -87,7 +87,7 @@ public class FileHandler {
 	}
 
 	public void writeDownloadedFile(String filename, DownloadedFile file) {
-		writeFileToPath(downloadedFilesPath + filename, file.toString());
+		writeFileToPath(downloadedFilesPath + filename, file.serialize());
 	}
 
 	public Result readResult(String filename) {
@@ -100,7 +100,7 @@ public class FileHandler {
 	}
 
 	public void writeResult(String filename, Result result) {
-		writeFileToPath(resultsPath + filename, result.toString());
+		writeFileToPath(resultsPath + filename, result.serialize());
 	}
 
 	public ArrayList<DownloadedFile> readAllDownloadedFiles() {

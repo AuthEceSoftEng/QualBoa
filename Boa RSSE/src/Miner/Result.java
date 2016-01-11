@@ -14,15 +14,31 @@ public class Result {
 		this.loc = loc;
 	}
 
-	@Override
-	public String toString() {
+	public String serialize() {
 		return path + "\n_________________________________\nSCORE = " + score
 				+ "\n_________________________________\nLOC = " + loc + "\n_________________________________\n"
 				+ content;
 	}
 
-	public String toPrint() {
+	@Override
+	public String toString() {
 		return path + "   " + score + "   " + loc;
+	}
+
+	public String getPath() {
+		return path;
+	}
+
+	public double getScore() {
+		return score;
+	}
+
+	public String getContent() {
+		return content;
+	}
+
+	public float getLoc() {
+		return loc;
 	}
 
 }

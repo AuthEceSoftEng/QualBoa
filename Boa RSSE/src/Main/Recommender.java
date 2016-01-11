@@ -51,11 +51,11 @@ public class Recommender {
 		// Print the top 10 recommended results
 		System.out.println("Top 10 recommended results:");
 		for (int i = 0; i < 10; i++)
-			System.out.println(results.get(i).toPrint());
+			System.out.println(results.get(i));
 		if (useFileHandler) {
 			String resultString = "";
 			for (Result result : results)
-				resultString += result.toPrint() + "\n";
+				resultString += result + "\n";
 			fileHandler.writeFile("Results.txt", resultString);
 		}
 	}

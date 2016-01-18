@@ -93,9 +93,9 @@ public class FileHandler {
 	public Result readResult(String filename) {
 		String fullcontent = readFileFromPath(resultsPath + filename);
 		String path = fullcontent.split("\\n_________________________________\\n")[0];
-		String content = fullcontent.split("\\n_________________________________\\n")[1];
-		String score = fullcontent.split("\\n_________________________________\\n")[1];
-		String loc = fullcontent.split("\\n_________________________________\\n")[1];
+		String score = fullcontent.split("\\n_________________________________\\n")[1].substring(8);
+		String loc = fullcontent.split("\\n_________________________________\\n")[2].substring(6);
+		String content = fullcontent.split("\\n_________________________________\\n")[3];
 		return new Result(path, content, Double.parseDouble(score), Float.parseFloat(loc));
 	}
 

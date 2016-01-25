@@ -115,7 +115,8 @@ public class GitHubFileDownloader {
 		input = input.replace("Files[] = ", "");
 		String[] URL = input.split("\\n+");
 		for (int i = 0; i < URL.length; i++) {
-			str_temp = URL[i].substring(URL[i].indexOf(',') + 2);
+			str_temp = URL[i].substring(URL[i].indexOf("Public Methods"));
+			str_temp = str_temp.substring(str_temp.indexOf(',') + 2);
 			str_temp = str_temp.substring(0, str_temp.indexOf('.'));
 			int_temp = Integer.parseInt(str_temp);
 

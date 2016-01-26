@@ -49,8 +49,12 @@ public class Recommender {
 			fileHandler.writeAllResults(results);
 
 		// Print the top 10 recommended results
-		System.out.println("Top 10 recommended results:");
-		for (int i = 0; i < 10; i++)
+		int top = 10;
+		if (results.size() < 10)
+			top = results.size();
+		
+		System.out.println("Top " + top + " recommended results:");
+		for (int i = 0; i < top; i++)
 			System.out.println(results.get(i));
 		if (useFileHandler) {
 			String resultString = "";

@@ -44,7 +44,7 @@ public class BoaClientDownloader {
 				// for (final InputHandle d : client.getDatasets())
 				// System.out.println(d);
 
-				InputHandle d = client.getDataset("2015 September/GitHub (small)");
+				InputHandle d = client.getDataset("2015 September/GitHub");
 				JobHandle JobOutput = client.query(query, d);
 				output = waitAndGetOutput(JobOutput);
 

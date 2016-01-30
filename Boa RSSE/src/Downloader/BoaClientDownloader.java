@@ -31,7 +31,11 @@ public class BoaClientDownloader {
 		String className = signature.getClassName();
 		String methodNames = signature.getMethodNames();
 		String methodTypes = signature.getMethodTypes();
-		String query = Queries.query(className, methodNames, methodTypes);
+		String query = "";
+		if (methodNames.matches("(?s)(.*),(.*)"))
+			query = Queries.query(className, methodNames, methodTypes);
+		else 
+			query = Queries.query_one_method(className, methodNames, methodTypes);
 		return query;
 	}
 
@@ -44,7 +48,7 @@ public class BoaClientDownloader {
 				// for (final InputHandle d : client.getDatasets())
 				// System.out.println(d);
 
-				InputHandle d = client.getDataset("2015 September/GitHub");
+				InputHandle d = client.getDataset("2015 September/GitHub (small)");
 				JobHandle JobOutput = client.query(query, d);
 				output = waitAndGetOutput(JobOutput);
 

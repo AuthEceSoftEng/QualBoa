@@ -43,7 +43,7 @@ public class Recommender {
 		// ArrayList<DownloadedFile> files = fileHandler.readAllDownloadedFiles();
 
 		// Score the files
-		Scorer scorer = new Scorer(queryInJava, files);
+		Scorer scorer = new Scorer(queryInJava, files, queryResult);
 		ArrayList<Result> results = scorer.getResults();
 		if (useFileHandler)
 			fileHandler.writeAllResults(results);
@@ -52,7 +52,7 @@ public class Recommender {
 		int top = 10;
 		if (results.size() < 10)
 			top = results.size();
-		
+
 		System.out.println("Top " + top + " recommended results:");
 		for (int i = 0; i < top; i++)
 			System.out.println(results.get(i));

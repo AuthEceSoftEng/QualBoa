@@ -1,18 +1,17 @@
 package Miner;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 
 import Database.DownloadedFile;
 import Database.FileHandler;
+import Main.MetricsThresholdsHandler;
 import Parser.Signature;
-import model.LOCcounter;
 
 public class Scorer {
 	private ArrayList<Result> results;
@@ -24,7 +23,9 @@ public class Scorer {
 	public static void main(String[] args) throws Exception {
 		// testing
 		String inputContent = new String(Files.readAllBytes(Paths.get("input.java")), "UTF-8");
-		Scorer scorer = new Scorer(inputContent, new FileHandler("Files"));
+		FileHandler fileHandler = new FileHandler("Files");
+		Scorer scorer = new Scorer(inputContent, fileHandler.readAllDownloadedFiles(),
+				fileHandler.readFile("Boa_output.txt"));
 		ArrayList<Result> results = scorer.getResults();
 		// print top 10
 		System.out.println("Top 10 recommended results: \n");
@@ -32,12 +33,15 @@ public class Scorer {
 			System.out.println("\n" + (i + 1) + "." + "\n\n" + results.get(i));
 	}
 
-	public Scorer(String inputContent, FileHandler fileHandler) throws Exception {
-		this(inputContent, fileHandler.readAllDownloadedFiles());
-	}
-
-	public Scorer(String inputContent, ArrayList<DownloadedFile> files) throws IOException {
+	public Scorer(String inputContent, ArrayList<DownloadedFile> files, String metricsContent) throws IOException {
 		ArrayList<Result> fileContents = new ArrayList<Result>();
+
+		// read the metrics for all results
+		HashMap<String, String> metricResults = new HashMap<String, String>();
+		for (String metricResult : metricsContent.split("\\n")) {
+			String[] splitMetricResult = metricResult.substring(10).split(",", 2);
+			metricResults.put(splitMetricResult[0], splitMetricResult[1]);
+		}
 
 		// for each result
 		// get the signature of the file
@@ -49,26 +53,31 @@ public class Scorer {
 			// extract signature
 			Signature outputSignature = new Signature(content, inputSignature.getClassName());
 
-			// calculate the score
+			// calculate the functional score
 			double score = calculateScore(inputSignature, outputSignature);
 
-			// count the lines of code
-			LOCcounter loccounter = new LOCcounter();
-			float loc = (float) loccounter.getLinesInFile(new BufferedReader(new StringReader(content)));
+			// find the relevant metrics
+			Metrics metrics = new Metrics(metricResults.get(file.getPath()));
 
-			fileContents.add(new Result(file.getPath(), content, score, loc));
+			// calculate the reusability index
+			double qualityScore = metrics.calculateQualityScore(metrics);
+
+			fileContents.add(new Result(file.getPath(), content, score, metrics, qualityScore));
 		}
 
 		// sort the results in descending order (equalities are sorted based on LOC)
 		Collections.sort(fileContents, new Comparator<Result>() {
 			@Override
 			public int compare(Result o1, Result o2) {
-				if (o1.score < o2.score)
+				float alpha = MetricsThresholdsHandler.Percentage_of_Functional_Score;
+				double o1score = alpha * o1.score + (1-alpha) * o1.qualityScore;
+				double o2score = alpha * o2.score + (1-alpha) * o2.qualityScore;
+				if (o1score < o2score)
 					return 1;
-				else if (o1.score > o2.score)
+				else if (o1score > o2score)
 					return -1;
 				else
-					return o1.loc < o2.loc ? -1 : o1.loc > o2.loc ? 1 : 0;
+					return 0;
 			}
 		});
 		results = fileContents;

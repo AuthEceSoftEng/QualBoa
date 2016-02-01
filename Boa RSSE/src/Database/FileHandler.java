@@ -9,6 +9,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 
+import Miner.Metrics;
 import Miner.Result;
 
 public class FileHandler {
@@ -94,9 +95,10 @@ public class FileHandler {
 		String fullcontent = readFileFromPath(resultsPath + filename);
 		String path = fullcontent.split("\\n_________________________________\\n")[0];
 		String score = fullcontent.split("\\n_________________________________\\n")[1].substring(8);
-		String loc = fullcontent.split("\\n_________________________________\\n")[2].substring(6);
-		String content = fullcontent.split("\\n_________________________________\\n")[3];
-		return new Result(path, content, Double.parseDouble(score), Float.parseFloat(loc));
+		String qualityScore = fullcontent.split("\\n_________________________________\\n")[2].substring(16);
+		String metrics = fullcontent.split("\\n_________________________________\\n")[3];
+		String content = fullcontent.split("\\n_________________________________\\n")[4];
+		return new Result(path, content, Double.parseDouble(score), new Metrics(metrics, true), Double.parseDouble(qualityScore));
 	}
 
 	public void writeResult(String filename, Result result) {

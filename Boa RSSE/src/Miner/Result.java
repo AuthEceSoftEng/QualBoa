@@ -5,24 +5,27 @@ public class Result {
 	String path;
 	double score;
 	String content;
-	float loc;
+	Metrics metrics;
+	double qualityScore;
 
-	public Result(String path, String content, double score, float loc) {
+	public Result(String path, String content, double score, Metrics metrics, double qualityScore) {
 		this.path = path;
 		this.content = content;
 		this.score = score;
-		this.loc = loc;
+		this.metrics = metrics;
+		this.qualityScore = qualityScore;
 	}
 
 	public String serialize() {
 		return path + "\n_________________________________\nSCORE = " + score
-				+ "\n_________________________________\nLOC = " + loc + "\n_________________________________\n"
+				+ "\n_________________________________\nQUALITY SCORE = " + qualityScore
+				+ "\n_________________________________\n" + metrics.serialize() + "\n_________________________________\n"
 				+ content;
 	}
 
 	@Override
 	public String toString() {
-		return path + "   " + score + "   " + loc;
+		return path + "   " + score + "   " + qualityScore;
 	}
 
 	public String getPath() {
@@ -37,8 +40,12 @@ public class Result {
 		return content;
 	}
 
-	public float getLoc() {
-		return loc;
+	public Metrics getMetrics() {
+		return metrics;
+	}
+
+	public double getQualityScore() {
+		return qualityScore;
 	}
 
 }

@@ -41,10 +41,10 @@ public class Signature {
 			extractMethodNames(targetClassName);
 			extractMethodTypes(targetClassName);
 		}
-		// System.out.println(className);
-		// System.out.println(methodNames);
-		// System.out.println(methodTypes);
-		// System.out.println(hasBlock);
+		//System.out.println(className);
+		//System.out.println(methodNames);
+		//System.out.println(methodTypes);
+		//System.out.println(hasBlock);
 	}
 
 	public static void main(String[] args) {
@@ -143,10 +143,11 @@ public class Signature {
 
 		for (int i = 1; i < temp.length; i++) {
 			String block = "no";
-			if (temp[i].matches("(?s)(.*)<Block>(.*)")) {
+			if (temp[i].matches("(?s)(.*)<Block>(.*)") && temp[i].matches("(?s)(.*)</Block>(.*)")) {
 				block = hasTrueBlock(temp[i]);
 				temp[i] = temp[i].substring(0, temp[i].indexOf("<Block>"));
-			}
+			}else if (!temp[i].matches("(?s)(.*)</Block>(.*)"))
+				block = "yes";
 			if (temp[i].matches("(?s)(.*)<Javadoc>(.*)"))
 				temp[i] = temp[i].substring(temp[i].indexOf("</Javadoc>"));
 			if (temp[i].matches("(?s)(.*)<SingleVariableDeclaration>(.*)"))

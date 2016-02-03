@@ -67,6 +67,22 @@ public class Queries {
 				"			stop;\n"+
 				"		}\n"+
 				"	}\n"+
+				"	before node: Method -> {\n"+
+				"		for (i:=0; i < length ; i++){\n"+
+				"			if (match(lowercase(method_name[i]), lowercase(node.name))){\n"+
+				"				Flag1[i] = true;\n"+
+				"				Flag2[i] = false;\n"+
+				"				Flag3[i] = false;\n"+
+				"				if (lowercase(method_name[i]) != lowercase(node.name)) Flag2[i] = true;\n"+
+				"				if (method_type[i] == \"-1\" || lowercase(node.return_type.name) == lowercase(method_type[i])) stop;\n"+
+				"				else{\n"+
+				"					Flag3[i] = true;\n"+
+				"					stop;\n"+
+				"				}\n"+
+				"			}\n"+
+				"		}\n"+
+				"		stop;\n"+
+				"	}\n"+
 				"	after node: Declaration -> {\n"+
 				"		exists (i: int; (Flag1[i] == true)){\n"+
 				"		counter1:=0;\n"+
@@ -113,7 +129,30 @@ public class Queries {
 				"		out = format(\"%s, Average Cyclomatic Complexity = %f\",out,complex);\n"+
 				"		out = format(\"%s, Coupling = %d\",out,coupling);\n"+
 				"		out = format(\"%s, LOC per Method = %f\",out,loc);\n"+
-					
+				
+				"		#calculate the rest efferent coupling\n"+
+				"		foreach (a: int; def(node.fields[a])){\n"+
+				"			var_type = node.fields[a].variable_type.name;\n"+
+				"			if (var_type != \"int\" && var_type != \"int[]\" && var_type != \"float\" && var_type != \"float[]\" \n"+
+				"				&& var_type != \"String\" && var_type != \"String[]\" && var_type != \"char\" && var_type != \"char[]\" \n"+
+				"				&& var_type != \"long\" && var_type != \"long[]\" && var_type != \"double\" && var_type != \"double[]\" \n"+
+				"				&& var_type != \"byte\" && var_type != \"byte[]\" && var_type != \"short\" && var_type != \"short[]\" \n"+
+				"				&& var_type != \"boolean\" && var_type != \"boolean[]\" && var_type != node.name && var_type != (node.name + \"[]\")){\n"+
+				"					flag = false;\n"+
+				"					for (n:=0; n < pointer ; n++){\n"+
+				"					    if (var_type == var_types[n]) flag = true;\n"+
+				"					}\n"+
+				"					if (flag == false){\n"+
+				"					    efferent++;\n"+
+				"				    	if (pointer < 30){\n"+
+				"				        	var_types[pointer]=var_type;\n"+
+				"					        pointer++;\n"+
+				"					    }\n"+
+				"					}\n"+
+				"			}\n"+
+				"		}\n"+
+				"		out = format(\"%s, Efferent couplings = %d\",out,efferent);\n"+
+				
 				"		#calculate block depth\n"+
 				"		max: float;\n"+
 				"		sum_max: float;\n"+
@@ -144,29 +183,6 @@ public class Queries {
 				"		depth = sum_max/len(node.methods);\n"+
 				"		out = format(\"%s, Average Block depth = %f\",out,depth);\n"+
 							
-				"		#calculate the rest efferent coupling\n"+
-				"		foreach (a: int; def(node.fields[a])){\n"+
-				"			var_type = node.fields[a].variable_type.name;\n"+
-				"			if (var_type != \"int\" && var_type != \"int[]\" && var_type != \"float\" && var_type != \"float[]\" \n"+
-				"				&& var_type != \"String\" && var_type != \"String[]\" && var_type != \"char\" && var_type != \"char[]\" \n"+
-				"				&& var_type != \"long\" && var_type != \"long[]\" && var_type != \"double\" && var_type != \"double[]\" \n"+
-				"				&& var_type != \"byte\" && var_type != \"byte[]\" && var_type != \"short\" && var_type != \"short[]\" \n"+
-				"				&& var_type != \"boolean\" && var_type != \"boolean[]\" && var_type != node.name && var_type != (node.name + \"[]\")){\n"+
-				"					flag = false;\n"+
-				"					for (n:=0; n < pointer ; n++){\n"+
-				"					    if (var_type == var_types[n]) flag = true;\n"+
-				"					}\n"+
-				"					if (flag == false){\n"+
-				"					    efferent++;\n"+
-				"				    	if (pointer < 30){\n"+
-				"				        	var_types[pointer]=var_type;\n"+
-				"					        pointer++;\n"+
-				"					    }\n"+
-				"					}\n"+
-				"			}\n"+
-				"		}\n"+
-				"		out = format(\"%s, Efferent couplings = %d\",out,efferent);\n"+
-				
 				"		#calculate cohesion in methods\n"+
 				"		cohesion=0;\n"+
 				"		var_names = new(var_names, len(node.fields), \"\");\n"+
@@ -266,20 +282,6 @@ public class Queries {
 				"		Files << out weight score;\n"+
 				"		}\n"+
 				"		}\n"+
-				"	}\n"+
-				"	before node: Method -> {\n"+
-				"		for (i:=0; i < length ; i++){\n"+
-				"			if (match(lowercase(method_name[i]), lowercase(node.name))){\n"+
-				"				Flag1[i] = true;\n"+
-				"				if (lowercase(method_name[i]) != lowercase(node.name)) Flag2[i] = true;\n"+
-				"				if (method_type[i] == \"-1\" || lowercase(node.return_type.name) == lowercase(method_type[i])) stop;\n"+
-				"				else{\n"+
-				"					Flag3[i] = true;\n"+
-				"					stop;\n"+
-				"				}\n"+
-				"			}\n"+
-				"		}\n"+
-				"		stop;\n"+
 				"	}\n"+
 				"	before node:Statement -> {\n"+
 				"		if (node.kind == StatementKind.IF || node.kind == StatementKind.WHILE || node.kind == StatementKind.FOR || node.kind == StatementKind.CASE)\n"+
@@ -374,6 +376,20 @@ public class Queries {
 				"		}else\n"+
 				"			stop;\n"+
 				"	}\n"+
+				"	before node: Method -> {\n"+
+				"		if (match(lowercase(method_name), lowercase(node.name))){\n"+
+				"			Flag1 = true;\n"+
+				"			Flag2 = false;\n"+
+				"			Flag3 = false;\n"+
+				"			if (lowercase(method_name) != lowercase(node.name)) Flag2 = true;\n"+
+				"			if (method_type == \"-1\" || lowercase(node.return_type.name) == lowercase(method_type)) stop;\n"+
+				"			else{\n"+
+				"				Flag3 = true;\n"+
+				"				stop;\n"+
+				"			}\n"+
+				"		}\n"+
+				"		stop;\n"+
+				"	}\n"+
 				"	after node: Declaration -> {\n"+
 				"		if (Flag1 == true){\n"+
 				"			out = format(\"%s/blob/master/%s\",p.project_url,cur_file);\n"+
@@ -406,7 +422,30 @@ public class Queries {
 				"		out = format(\"%s, Average Cyclomatic Complexity = %f\",out,complex);\n"+
 				"		out = format(\"%s, Coupling = %d\",out,coupling);\n"+
 				"		out = format(\"%s, LOC per Method = %f\",out,loc);\n"+
-					
+				
+				"		#calculate the rest efferent coupling\n"+
+				"		foreach (a: int; def(node.fields[a])){\n"+
+				"			var_type = node.fields[a].variable_type.name;\n"+
+				"			if (var_type != \"int\" && var_type != \"int[]\" && var_type != \"float\" && var_type != \"float[]\" \n"+
+				"				&& var_type != \"String\" && var_type != \"String[]\" && var_type != \"char\" && var_type != \"char[]\" \n"+
+				"				&& var_type != \"long\" && var_type != \"long[]\" && var_type != \"double\" && var_type != \"double[]\" \n"+
+				"				&& var_type != \"byte\" && var_type != \"byte[]\" && var_type != \"short\" && var_type != \"short[]\" \n"+
+				"				&& var_type != \"boolean\" && var_type != \"boolean[]\" && var_type != node.name && var_type != (node.name + \"[]\")){\n"+
+				"					flag = false;\n"+
+				"					for (n:=0; n < pointer ; n++){\n"+
+				"					    if (var_type == var_types[n]) flag = true;\n"+
+				"					}\n"+
+				"					if (flag == false){\n"+
+				"					    efferent++;\n"+
+				"				    	if (pointer < 30){\n"+
+				"				        	var_types[pointer]=var_type;\n"+
+				"					        pointer++;\n"+
+				"					    }\n"+
+				"					}\n"+
+				"			}\n"+
+				"		}\n"+
+				"		out = format(\"%s, Efferent couplings = %d\",out,efferent);\n"+
+				
 				"		#calculate block depth\n"+
 				"		max: float;\n"+
 				"		sum_max: float;\n"+
@@ -436,29 +475,6 @@ public class Queries {
 				"		}\n"+
 				"		depth = sum_max/len(node.methods);\n"+
 				"		out = format(\"%s, Average Block depth = %f\",out,depth);\n"+
-							
-				"		#calculate the rest efferent coupling\n"+
-				"		foreach (a: int; def(node.fields[a])){\n"+
-				"			var_type = node.fields[a].variable_type.name;\n"+
-				"			if (var_type != \"int\" && var_type != \"int[]\" && var_type != \"float\" && var_type != \"float[]\" \n"+
-				"				&& var_type != \"String\" && var_type != \"String[]\" && var_type != \"char\" && var_type != \"char[]\" \n"+
-				"				&& var_type != \"long\" && var_type != \"long[]\" && var_type != \"double\" && var_type != \"double[]\" \n"+
-				"				&& var_type != \"byte\" && var_type != \"byte[]\" && var_type != \"short\" && var_type != \"short[]\" \n"+
-				"				&& var_type != \"boolean\" && var_type != \"boolean[]\" && var_type != node.name && var_type != (node.name + \"[]\")){\n"+
-				"					flag = false;\n"+
-				"					for (n:=0; n < pointer ; n++){\n"+
-				"					    if (var_type == var_types[n]) flag = true;\n"+
-				"					}\n"+
-				"					if (flag == false){\n"+
-				"					    efferent++;\n"+
-				"				    	if (pointer < 30){\n"+
-				"				        	var_types[pointer]=var_type;\n"+
-				"					        pointer++;\n"+
-				"					    }\n"+
-				"					}\n"+
-				"			}\n"+
-				"		}\n"+
-				"		out = format(\"%s, Efferent couplings = %d\",out,efferent);\n"+
 				
 				"		#calculate cohesion in methods\n"+
 				"		cohesion=0;\n"+
@@ -558,18 +574,6 @@ public class Queries {
 				"		#FINALLY output everything\n"+
 				"		Files << out weight score;\n"+
 				"		}\n"+
-				"	}\n"+
-				"	before node: Method -> {\n"+
-				"		if (match(lowercase(method_name), lowercase(node.name))){\n"+
-				"			Flag1 = true;\n"+
-				"			if (lowercase(method_name) != lowercase(node.name)) Flag2 = true;\n"+
-				"			if (method_type == \"-1\" || lowercase(node.return_type.name) == lowercase(method_type)) stop;\n"+
-				"			else{\n"+
-				"				Flag3 = true;\n"+
-				"				stop;\n"+
-				"			}\n"+
-				"		}\n"+
-				"		stop;\n"+
 				"	}\n"+
 				"	before node:Statement -> {\n"+
 				"		if (node.kind == StatementKind.IF || node.kind == StatementKind.WHILE || node.kind == StatementKind.FOR || node.kind == StatementKind.CASE)\n"+

@@ -143,11 +143,13 @@ public class Signature {
 
 		for (int i = 1; i < temp.length; i++) {
 			String block = "no";
-			if (temp[i].matches("(?s)(.*)<Block>(.*)") && temp[i].matches("(?s)(.*)</Block>(.*)")) {
-				block = hasTrueBlock(temp[i]);
+			if (temp[i].matches("(?s)(.*)<Block>(.*)")) {
+				if (temp[i].matches("(?s)(.*)</Block>(.*)"))
+					block = hasTrueBlock(temp[i]);
+				else
+					block = "yes";
 				temp[i] = temp[i].substring(0, temp[i].indexOf("<Block>"));
-			}else if (!temp[i].matches("(?s)(.*)</Block>(.*)"))
-				block = "yes";
+			}
 			if (temp[i].matches("(?s)(.*)<Javadoc>(.*)"))
 				temp[i] = temp[i].substring(temp[i].indexOf("</Javadoc>"));
 			if (temp[i].matches("(?s)(.*)<SingleVariableDeclaration>(.*)"))

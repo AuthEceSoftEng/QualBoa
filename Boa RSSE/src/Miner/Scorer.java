@@ -27,10 +27,14 @@ public class Scorer {
 		Scorer scorer = new Scorer(inputContent, fileHandler.readAllDownloadedFiles(),
 				fileHandler.readFile("Boa_output.txt"));
 		ArrayList<Result> results = scorer.getResults();
-		// print top 10
-		System.out.println("Top 10 recommended results: \n");
-		for (int i = 0; i < 10; i++)
-			System.out.println("\n" + (i + 1) + "." + "\n\n" + results.get(i));
+		// Print the top 10 recommended results
+				int top = 10;
+				if (results.size() < 10)
+					top = results.size();
+
+				System.out.println("Top " + top + " recommended results:");
+				for (int i = 0; i < top; i++)
+					System.out.println(results.get(i));
 	}
 
 	public Scorer(String inputContent, ArrayList<DownloadedFile> files, String metricsContent) throws IOException {
@@ -141,9 +145,6 @@ public class Scorer {
 		String[] outputMethodsName = outputMethodName.split(",");
 		String[] outputMethodsType = outputMethodType.split(",");
 		String[] hasBlock = block.split(",");
-
-		// for (int i=0;i<inputMethodsName.length;i++) inputMethodsName[i] = stringProcess(inputMethodsName[i]);
-		// for (int i=0;i<outputMethodsName.length;i++) outputMethodsName[i] = stringProcess(outputMethodsName[i]);
 
 		double[] scoreMethodsName = new double[inputMethodsName.length];
 		double[] scoreMethodsType = new double[inputMethodsName.length];

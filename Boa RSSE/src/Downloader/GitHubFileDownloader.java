@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import javax.xml.bind.DatatypeConverter;
 
 import Database.DownloadedFile;
+import Database.FileHandler;
 import Main.PropertiesHandler;
 
 /**
@@ -149,6 +150,9 @@ public class GitHubFileDownloader {
 		// test it
 		GitHubFileDownloader gitHubDownloader = new GitHubFileDownloader(PropertiesHandler.GitHubUsername,
 				PropertiesHandler.GitHubPassword);
-		gitHubDownloader.downloadFiles("Boa_output.txt");
+		FileHandler fileHandler = new FileHandler("Files");
+		String queryResult = fileHandler.readFile("Boa_output.txt");
+		ArrayList<DownloadedFile> files = gitHubDownloader.downloadFiles(queryResult);
+		fileHandler.writeAllDownloadedFiles(files);
 	}
 }

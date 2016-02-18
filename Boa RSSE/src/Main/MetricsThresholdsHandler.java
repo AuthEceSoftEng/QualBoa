@@ -14,7 +14,6 @@ public class MetricsThresholdsHandler {
 	public static float Efferent_Couplings;
 	public static float Number_of_Public_Fields;
 	public static float Number_of_Public_Methods;
-	public static float Percentage_of_Functional_Score;
 	static {
 		InputStream in;
 		try {
@@ -30,7 +29,6 @@ public class MetricsThresholdsHandler {
 			Efferent_Couplings = Float.parseFloat(configProp.getProperty("Efferent_Couplings"));
 			Number_of_Public_Fields = Float.parseFloat(configProp.getProperty("Number_of_Public_Fields"));
 			Number_of_Public_Methods = Float.parseFloat(configProp.getProperty("Number_of_Public_Methods"));
-			Percentage_of_Functional_Score = Float.parseFloat(configProp.getProperty("Percentage_of_Functional_Score"));
 			in.close();
 		} catch (IOException e) {
 			e.printStackTrace();

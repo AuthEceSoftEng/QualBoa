@@ -10,7 +10,6 @@ import java.util.HashMap;
 
 import Database.DownloadedFile;
 import Database.FileHandler;
-import Main.MetricsThresholdsHandler;
 import Parser.Signature;
 
 public class Scorer {
@@ -69,19 +68,16 @@ public class Scorer {
 			fileContents.add(new Result(file.getPath(), content, score, metrics, qualityScore));
 		}
 
-		// sort the results in descending order (equalities are sorted based on LOC)
+		// sort the results in descending order (equalities are sorted based on quality score)
 		Collections.sort(fileContents, new Comparator<Result>() {
 			@Override
 			public int compare(Result o1, Result o2) {
-				float alpha = MetricsThresholdsHandler.Percentage_of_Functional_Score;
-				double o1score = alpha * o1.score + (1-alpha) * o1.qualityScore;
-				double o2score = alpha * o2.score + (1-alpha) * o2.qualityScore;
-				if (o1score < o2score)
+				if (o1.score < o2.score)
 					return 1;
-				else if (o1score > o2score)
+				else if (o1.score > o2.score)
 					return -1;
 				else
-					return 0;
+					return o1.qualityScore < o2.qualityScore ? 1 : (o1.qualityScore > o2.qualityScore ? -1 : 0);
 			}
 		});
 		results = fileContents;

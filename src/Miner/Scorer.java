@@ -27,13 +27,13 @@ public class Scorer {
 				fileHandler.readFile("Boa_output.txt"));
 		ArrayList<Result> results = scorer.getResults();
 		// Print the top 10 recommended results
-				int top = 10;
-				if (results.size() < 10)
-					top = results.size();
+		int top = 10;
+		if (results.size() < 10)
+			top = results.size();
 
-				System.out.println("Top " + top + " recommended results:");
-				for (int i = 0; i < top; i++)
-					System.out.println(results.get(i));
+		System.out.println("Top " + top + " recommended results:");
+		for (int i = 0; i < top; i++)
+			System.out.println(results.get(i));
 	}
 
 	public Scorer(String inputContent, ArrayList<DownloadedFile> files, String metricsContent) throws IOException {
@@ -112,8 +112,8 @@ public class Scorer {
 		if (inputClass.trim().equals("-1"))
 			return 1.0;
 
-		String[] inputClassTokens = stringProcess(inputClass);
-		String[] outputClassTokens = stringProcess(outputClass);
+		String[] inputClassTokens = tokenizeString(inputClass);
+		String[] outputClassTokens = tokenizeString(outputClass);
 
 		double score = JaccardCoefficient.similarity(inputClassTokens, outputClassTokens);
 
@@ -151,8 +151,8 @@ public class Scorer {
 
 		for (int i = 0; i < inputMethodsName.length; i++) {
 			for (int j = 0; j < outputMethodsName.length; j++) {
-				String[] inputMethodTokens = stringProcess(inputMethodsName[i]);
-				String[] outputMethodTokens = stringProcess(outputMethodsName[j]);
+				String[] inputMethodTokens = tokenizeString(inputMethodsName[i]);
+				String[] outputMethodTokens = tokenizeString(outputMethodsName[j]);
 				if (JaccardCoefficient.similarity(inputMethodTokens, outputMethodTokens) > 0
 						&& hasBlock[j].trim().equals("yes")) {
 					if (scoreMethodsName[i] == 0) {
@@ -201,11 +201,10 @@ public class Scorer {
 		return score;
 	}
 
-	public String[] stringProcess(String text) {
-		String[] tokens = StringProcessing.tokenize(text);
-		tokens = StringProcessing.removeStopWords(tokens);
-
+	public String[] tokenizeString(String text) {
+		String[] tokens = text.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])");
+		for (int i = 0; i < tokens.length; i++)
+			tokens[i] = tokens[i].toLowerCase();
 		return tokens;
 	}
-
 }

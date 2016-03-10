@@ -12,6 +12,5 @@
 			<attribute name="javadoc_location" value="http://thdiaman.github.io/ASTExtractor/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/LOC.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

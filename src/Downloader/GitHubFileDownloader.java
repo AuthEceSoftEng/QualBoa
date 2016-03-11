@@ -78,10 +78,10 @@ public class GitHubFileDownloader {
 			br.close();
 		} catch (ConnectException e) {
 			// No error handling, just print the exception
-			System.out.println(e);
+			// System.out.println(e);
 		} catch (IOException e) {
 			// No error handling, just print the exception
-			System.out.println(e);
+			// System.out.println(e);
 		}
 		return response;
 	}

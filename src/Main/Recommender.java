@@ -13,12 +13,32 @@ import Miner.*;
 
 public class Recommender {
 
-	public static void main(String[] args) throws Exception, BoaException, IOException {
+	/**
+	 * Test function which has the behavior of executing java -jar QualBoa.jar -query=Queries/Stack.java -folder=Files
+	 * 
+	 * @param args unused parameter.
+	 * @throws BoaException when there is an error with the connection to Boa.
+	 * @throws IOException when there is an error reading the files given.
+	 */
+	public static void main(String[] args) throws BoaException, IOException {
+		recommend("Queries/Stack.java", "Files");
+	}
+
+	/**
+	 * Receives the filename of the query and the filename of the folder to save the results as parameters and executes
+	 * the recommender.
+	 * 
+	 * @param queryFilename the filename of the query.
+	 * @param folderFilename the filename of the folder to save the results.
+	 * @throws BoaException when there is an error with the connection to Boa.
+	 * @throws IOException when there is an error reading the files given.
+	 */
+	public static void recommend(String queryFilename, String folderFilename) throws BoaException, IOException {
 		// Get the query as a java interface
-		String queryInJava = new String(Files.readAllBytes(Paths.get("input.java")), "UTF-8");
+		String queryInJava = new String(Files.readAllBytes(Paths.get(queryFilename)), "UTF-8");
 
 		// Create a file handler to be used throughout the recommender
-		FileHandler fileHandler = new FileHandler("Files");
+		FileHandler fileHandler = new FileHandler(folderFilename);
 		boolean useFileHandler = true;
 
 		// Execute query in Boa

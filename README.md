@@ -8,7 +8,7 @@ Libraries used:
 You can cite QualBoa by citing the following publication:
 ```
 Themistoklis Diamantopoulos, Klearchos Thomopoulos, and Andreas L. Symeonidis. "QualBoa: Reusability-aware
-Recommendations of Source Code Components." To appear in Proceedings of the 13th Working Conference o
+Recommendations of Source Code Components." To appear in Proceedings of the 13th Working Conference of
 Mining Software Repositories, MSR 2016.
 ```
 

@@ -1,4 +1,4 @@
-package Downloader;
+package downloader;
 
 public class Queries {	
 	

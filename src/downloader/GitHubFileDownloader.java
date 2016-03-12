@@ -1,4 +1,4 @@
-package Downloader;
+package downloader;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,9 +11,9 @@ import java.util.ArrayList;
 
 import javax.xml.bind.DatatypeConverter;
 
-import Database.DownloadedFile;
-import Database.FileHandler;
-import Main.PropertiesHandler;
+import database.DownloadedFile;
+import database.FileHandler;
+import main.PropertiesHandler;
 
 /**
  * A downloader for files of the GitHub API.

@@ -1,6 +1,6 @@
-package Miner;
+package miner;
 
-import Main.MetricsThresholdsHandler;
+import main.MetricsThresholdsHandler;
 
 public class Metrics {
 	public float Average_Lines_of_Code_per_Method;

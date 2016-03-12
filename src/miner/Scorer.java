@@ -1,4 +1,4 @@
-package Miner;
+package miner;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -8,9 +8,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 
-import Database.DownloadedFile;
-import Database.FileHandler;
-import Parser.Signature;
+import database.DownloadedFile;
+import database.FileHandler;
+import parser.Signature;
 
 public class Scorer {
 	private ArrayList<Result> results;

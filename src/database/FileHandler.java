@@ -1,4 +1,4 @@
-package Database;
+package database;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -9,8 +9,8 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 
-import Miner.Metrics;
-import Miner.Result;
+import miner.Metrics;
+import miner.Result;
 
 public class FileHandler {
 

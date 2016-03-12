@@ -1,4 +1,4 @@
-package Miner;
+package miner;
 
 public class TanimotoCoefficient {
 

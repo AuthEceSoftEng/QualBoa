@@ -1,15 +1,15 @@
-package Main;
+package main;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
-import Database.DownloadedFile;
-import Database.FileHandler;
-import Downloader.*;
 import edu.iastate.cs.boa.BoaException;
-import Miner.*;
+import miner.*;
+import database.DownloadedFile;
+import database.FileHandler;
+import downloader.*;
 
 public class Recommender {
 

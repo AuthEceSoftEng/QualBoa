@@ -1,12 +1,12 @@
-package Downloader;
+package downloader;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import Main.PropertiesHandler;
-import Parser.Signature;
 import edu.iastate.cs.boa.*;
+import main.PropertiesHandler;
+import parser.Signature;
 
 public class BoaClientDownloader {
 	private String boaUsername;

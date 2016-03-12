@@ -14,14 +14,14 @@ import downloader.*;
 public class Recommender {
 
 	/**
-	 * Test function which has the behavior of executing java -jar QualBoa.jar -query=Queries/Stack.java -folder=Files
+	 * Test function which has the behavior of executing java -jar QualBoa.jar -query=queries/Stack.java -folder=Files
 	 * 
 	 * @param args unused parameter.
 	 * @throws BoaException when there is an error with the connection to Boa.
 	 * @throws IOException when there is an error reading the files given.
 	 */
 	public static void main(String[] args) throws BoaException, IOException {
-		recommend("Queries/Stack.java", "Files");
+		recommend("queries/Stack.java", "Files");
 	}
 
 	/**

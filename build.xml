@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project name="QualBoa" default="dist" basedir=".">
+
+	<description>
+		QualBoa: Reusability-aware Recommendations of Source Code Components
+	</description>
+
+	<property name="src" location="src" />
+	<property name="lib" location="lib" />
+	<property name="bin" location="bin" />
+	<property name="dist" location="dist" />
+	<property name="queries" location="queries" />
+	<property name="version.num" value="0.1" />
+	<path id="classpath">
+		<fileset dir="${lib}" includes="**/*.jar" />
+	</path>
+	<tstamp>
+		<format property="TODAY" pattern="yyyy-MM-dd HH:mm:ss" />
+	</tstamp>
+
+	<target name="init" description="create the bin folder">
+		<mkdir dir="${bin}" />
+	</target>
+
+	<target name="compile" depends="init" description="compile the java files">
+		<javac includeantruntime="true" srcdir="${src}" destdir="${bin}" classpathref="classpath" />
+	</target>
+
+	<target name="initdist" description="create the dist folder">
+		<mkdir dir="${dist}" />
+		<mkdir dir="${dist}/queries" />
+	</target>
+
+	<target name="copyqueries" depends="initdist" description="copy the queries folder">
+		<copy todir="${dist}/queries">
+			<fileset dir="${queries}" includes="**" />
+		</copy>
+	</target>
+
+	<target name="copyreadme" depends="initdist" description="copy the readme and license">
+		<copy file="README.md" tofile="${dist}/readme.txt" />
+		<copy file="LICENSE.md" tofile="${dist}/license.txt" />
+	</target>
+
+	<target name="dist" depends="compile,copyreadme,copyqueries" description="create the jar file">
+		<jar jarfile="${dist}/QualBoa.jar" basedir="${bin}">
+			<manifest>
+				<attribute name="Main-Class" value="main.MainApp" />
+				<attribute name="Class-Path" value="." />
+				<attribute name="Version" value="${version.num}" />
+				<attribute name="Built-Date" value="${TODAY}" />
+			</manifest>
+			<zipfileset excludes="META-INF/*.SF" src="${lib}/boa-client-0.1.0.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="${lib}/ASTExtractor-0.1.jar" />
+		</jar>
+	</target>
+
+	<target name="createziprelease" depends="dist" description="create the zip file of the release">
+		<zip destfile="${dist}/QualBoa_v${version.num}.zip">
+			<zipfileset dir="${dist}" excludes="*.zip" />
+		</zip>
+	</target>
+
+	<target name="clean" description="delete all build directories">
+		<delete dir="${bin}" />
+		<delete dir="${dist}" />
+	</target>
+
+</project>
+

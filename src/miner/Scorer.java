@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 
 import database.DownloadedFile;
 import database.FileHandler;
@@ -26,6 +28,7 @@ public class Scorer {
 		Scorer scorer = new Scorer(inputContent, fileHandler.readAllDownloadedFiles(),
 				fileHandler.readFile("Boa_output.txt"));
 		ArrayList<Result> results = scorer.getResults();
+		fileHandler.writeAllResults(results);
 		// Print the top 10 recommended results
 		int top = 10;
 		if (results.size() < 10)
@@ -97,10 +100,9 @@ public class Scorer {
 
 		float score = TanimotoCoefficient.similarity(defaultVector, scoreVector);
 
-		// test results
-		// System.out.println(Arrays.toString(defaultVector));
-		// System.out.println(Arrays.toString(scoreVector));
-		// System.out.println(score);
+		// Test the results
+		// System.out.println("score vector: "+Arrays.toString(scoreVector));
+		// System.out.println("total score: "+score+"\n");
 
 		return score;
 	}
@@ -117,94 +119,101 @@ public class Scorer {
 
 		double score = JaccardCoefficient.similarity(inputClassTokens, outputClassTokens);
 
-		// test results
-		// System.out.println("final:" + inputClass);
-		// System.out.println("final:" + outputClass);
-		// System.out.println(score);
+		// Test the results
+		// System.out.println("inputClass name: " + inputClass);
+		// System.out.println("outputClass name: " + outputClass);
+		// System.out.println("class name score: " + score);
 		return score;
 	}
 
 	public double[] methodsScore(Signature inputSignature, Signature outputSignature) {
-		String inputMethodName = inputSignature.getMethodNames();
-		String inputMethodType = inputSignature.getMethodTypes();
-		String outputMethodName = outputSignature.getMethodNames();
-		String outputMethodType = outputSignature.getMethodTypes();
-		String block = outputSignature.getBlock();
+		String[] inputMethodsName = inputSignature.getMethodNames().replace("\"", "").split(",");
+		String[] inputMethodsType = inputSignature.getMethodTypes().replace("\"", "").split(",");
+		String[] outputMethodsName = outputSignature.getMethodNames().replace("\"", "").split(",");
+		String[] outputMethodsType = outputSignature.getMethodTypes().replace("\"", "").split(",");
+		String[][] inputMethodArgs = inputSignature.getMethodArgs();
+		String[][] outputMethodArgs = outputSignature.getMethodArgs();
+		String[] hasBlock = outputSignature.getBlock().split(",");
 
-		inputMethodName = inputMethodName.replace("\"", "");
-		inputMethodType = inputMethodType.replace("\"", "");
-		outputMethodName = outputMethodName.replace("\"", "");
-		outputMethodType = outputMethodType.replace("\"", "");
+		double[] methodScore = new double[inputMethodsName.length];
 
-		String[] inputMethodsName = inputMethodName.split(",");
-		String[] inputMethodsType = inputMethodType.split(",");
-		String[] outputMethodsName = outputMethodName.split(",");
-		String[] outputMethodsType = outputMethodType.split(",");
-		String[] hasBlock = block.split(",");
+		// definition of methodVector = [nameScore, typeScore, argScore]
+		double[] methodVector = { 0,0,0 };
+		double[] defaultVector = { 1,1,1 };
 
-		double[] scoreMethodsName = new double[inputMethodsName.length];
-		double[] scoreMethodsType = new double[inputMethodsName.length];
 		for (int i = 0; i < inputMethodsName.length; i++) {
-			scoreMethodsName[i] = 0;
-			scoreMethodsType[i] = 0;
+			methodScore[i] = 0;
 		}
-
+		// find the max method score for each method
 		for (int i = 0; i < inputMethodsName.length; i++) {
 			for (int j = 0; j < outputMethodsName.length; j++) {
+				double jaccard = 0;
+				double tanimoto = 0;
+				for (int k = 0; k < methodVector.length; k++)
+					methodVector[k] = 0;
+
 				String[] inputMethodTokens = tokenizeString(inputMethodsName[i]);
 				String[] outputMethodTokens = tokenizeString(outputMethodsName[j]);
-				if (JaccardCoefficient.similarity(inputMethodTokens, outputMethodTokens) > 0
-						&& hasBlock[j].trim().equals("yes")) {
-					if (scoreMethodsName[i] == 0) {
-						scoreMethodsName[i] = JaccardCoefficient.similarity(inputMethodTokens, outputMethodTokens);
-						if (inputMethodsType[i].equals(outputMethodsType[j]))
-							scoreMethodsType[i] = 1;
-					} else {
-						if (scoreMethodsType[i] == 0) {
-							if (inputMethodsType[i].equals(outputMethodsType[j])) {
-								scoreMethodsType[i] = 1;
-								scoreMethodsName[i] = JaccardCoefficient.similarity(inputMethodTokens,
-										outputMethodTokens);
-							} else {
-								if (JaccardCoefficient.similarity(inputMethodTokens, outputMethodTokens) > scoreMethodsName[i]) {
-									scoreMethodsName[i] = JaccardCoefficient.similarity(inputMethodTokens,
-											outputMethodTokens);
-								}
-							}
-						} else {
-							if (inputMethodsType[i].equals(outputMethodsType[j])) {
-								if (JaccardCoefficient.similarity(inputMethodTokens, outputMethodTokens) > scoreMethodsName[i]) {
-									scoreMethodsName[i] = JaccardCoefficient.similarity(inputMethodTokens,
-											outputMethodTokens);
-								}
-							}
-						}
-					}
+
+				jaccard = JaccardCoefficient.similarity(inputMethodTokens, outputMethodTokens);
+				if (hasBlock[j].trim().equals("yes") && jaccard > 0) {
+					methodVector[0] = jaccard;
+					if (inputMethodsType[i].trim().equals(outputMethodsType[j]))
+						methodVector[1] = 1;
+					methodVector[2] = calculateArgsScore(inputMethodArgs,i,outputMethodArgs,j);
+				}
+				tanimoto = TanimotoCoefficient.similarity(methodVector, defaultVector);
+				if (tanimoto > methodScore[i]) {
+					methodScore[i] = tanimoto;
+				}
+			}
+		}
+		// Test the results
+		// System.out.println("method score: " + Arrays.toString(methodScore));
+
+		return methodScore;
+	}
+
+	private double calculateArgsScore(String[][] inputMethodArgs, int a, String[][] outputMethodArgs, int b) {
+		int counter = 0;
+		String[][] inputArgs = inputMethodArgs;
+		String[][] outputArgs = outputMethodArgs;
+
+		for (int i = 0; i < inputArgs[a].length; i++) {
+			for (int j = 0; j < outputArgs[b].length; j++) {
+				if (inputArgs[a][i].equals(outputArgs[b][j])){
+					counter++;
+					outputArgs[b][j] = null;
 				}
 			}
 		}
 
-		double[] score = new double[scoreMethodsName.length];
-		for (int i = 0; i < scoreMethodsName.length; i++) {
-			if (scoreMethodsType[i] == 0)
-				score[i] = scoreMethodsName[i] / 2;
+		double score;
+		if (inputArgs[a].length < outputArgs[b].length) {
+			score = (double) counter / outputArgs[b].length;
+		} else if (inputArgs[a].length > outputArgs[b].length) {
+			score = (double) counter / inputArgs[a].length;
+		} else {
+			if (inputArgs[a].length == 0)
+				score = 1;
 			else
-				score[i] = scoreMethodsName[i];
+				score = (double) counter / inputArgs[a].length;
 		}
-
-		/*
-		 * test results
-		 * for (double a : scoreMethodsName) System.out.println(a);
-		 * for (double a : scoreMethodsType) System.out.println(a);
-		 * for (double a : score) System.out.println(a);
-		 */
 		return score;
 	}
 
 	public String[] tokenizeString(String text) {
-		String[] tokens = text.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])");
+
+		// Split camelCase or "_"
+		String[] tokens = text.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])|[_]");
 		for (int i = 0; i < tokens.length; i++)
 			tokens[i] = tokens[i].toLowerCase();
+
+		// Remove any empty values
+		List<String> list = new ArrayList<>();
+		Collections.addAll(list, tokens);
+		list.removeAll(Arrays.asList(""));
+		tokens = list.toArray(new String[list.size()]);
 		return tokens;
 	}
 }

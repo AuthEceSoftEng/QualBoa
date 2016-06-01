@@ -8,9 +8,11 @@ public class Signature {
 	private String methodNames;
 	private String methodTypes;
 	private String hasBlock;
+	private String[][] methodArgs;
 
 	public Signature(String content) {
 		ast = ASTExtractor.parseString(content);
+		// Keep the XML file
 		// Files.write(Paths.get("AST_XML.xml"), ast.getBytes());
 		className = "";
 		methodNames = "";
@@ -19,14 +21,19 @@ public class Signature {
 		extractClassName();
 		extractMethodNames(null);
 		extractMethodTypes(null);
-		// System.out.println(className);
-		// System.out.println(methodNames);
-		// System.out.println(methodTypes);
-		// System.out.println(hasBlock);
+		extractMethodArgs(null);
+		
+		// Test the results
+		// System.out.println("class name: " + className);
+		// System.out.println("method names: " + methodNames);
+		// System.out.println("method types: " + methodTypes);
+		// System.out.println("has block: " + hasBlock);
+		// System.out.println("method arguments: " + Arrays.deepToString(methodArgs));
 	}
 
 	public Signature(String content, String targetClassName) {
 		ast = ASTExtractor.parseString(content);
+		// Keep the XML file
 		// Files.write(Paths.get("AST_XML.xml"), ast.getBytes());
 		className = "";
 		methodNames = "";
@@ -36,21 +43,26 @@ public class Signature {
 			extractClassName();
 			extractMethodNames(null);
 			extractMethodTypes(null);
+			extractMethodArgs(null);
 		} else {
 			extractClassName(targetClassName);
 			extractMethodNames(targetClassName);
 			extractMethodTypes(targetClassName);
+			extractMethodArgs(targetClassName);
 		}
-		//System.out.println(className);
-		//System.out.println(methodNames);
-		//System.out.println(methodTypes);
-		//System.out.println(hasBlock);
+		
+		// Test the results
+		// System.out.println("class name: " + className);
+		// System.out.println("method names: " + methodNames);
+		// System.out.println("method types: " + methodTypes);
+		// System.out.println("has block: " + hasBlock);
+		// System.out.println("method arguments: " + Arrays.deepToString(methodArgs));
 	}
 
 	public static void main(String[] args) {
-		// test
-		// SignatureExtractor("input.java");
-		// SignatureExtractor signature2 = new SignatureExtractor("Files/sourceCode113.java",signature.getClassName());
+		// Test the class
+		// String inputContent = new String(Files.readAllBytes(Paths.get("input.java")), "UTF-8");
+		// Signature signature = new Signature(inputContent);
 	}
 
 	public String getClassName() {
@@ -67,6 +79,10 @@ public class Signature {
 
 	public String getBlock() {
 		return hasBlock;
+	}
+	
+	public String[][] getMethodArgs() {
+		return methodArgs;
 	}
 
 	public void extractClassName() {
@@ -152,6 +168,10 @@ public class Signature {
 			}
 			if (temp[i].matches("(?s)(.*)<Javadoc>(.*)"))
 				temp[i] = temp[i].substring(temp[i].indexOf("</Javadoc>"));
+			if (temp[i].matches("(?s)(.*)<MarkerAnnotation>(.*)"))
+				temp[i] = temp[i].substring(temp[i].indexOf("</MarkerAnnotation>"));
+			if (temp[i].matches("(?s)(.*)<SingleMemberAnnotation>(.*)"))
+				temp[i] = temp[i].substring(temp[i].indexOf("</SingleMemberAnnotation>"));
 			if (temp[i].matches("(?s)(.*)<SingleVariableDeclaration>(.*)"))
 				temp[i] = temp[i].substring(0, temp[i].indexOf("<SingleVariableDeclaration>"));
 			if (temp[i].matches("(?s)(.*)<ParameterizedType>(.*)"))
@@ -203,6 +223,10 @@ public class Signature {
 				temp[i] = temp[i].substring(temp[i].indexOf("</Javadoc>"));
 			if (temp[i].matches("(?s)(.*)<Block>(.*)"))
 				temp[i] = temp[i].substring(0, temp[i].indexOf("<Block>"));
+			if (temp[i].matches("(?s)(.*)<MarkerAnnotation>(.*)"))
+				temp[i] = temp[i].substring(temp[i].indexOf("</MarkerAnnotation>"));
+			if (temp[i].matches("(?s)(.*)<SingleMemberAnnotation>(.*)"))
+				temp[i] = temp[i].substring(temp[i].indexOf("</SingleMemberAnnotation>"));
 			if (temp[i].matches("(?s)(.*)<SingleVariableDeclaration>(.*)"))
 				temp[i] = temp[i].substring(0, temp[i].indexOf("<SingleVariableDeclaration>"));
 			if (temp[i].matches("(?s)(.*)<PrimitiveType>(.*)"))
@@ -223,6 +247,64 @@ public class Signature {
 		}
 	}
 
+	public void extractMethodArgs(String targetClassName) {
+		String temp1 = "";
+		if (targetClassName != null) {
+			String temp[] = ast.split("<TypeDeclaration>");
+			targetClassName = targetClassName.replace("\"", "");
+
+			for (int i = 1; i < temp.length; i++) {
+				if (temp[i].matches("(?s)(.*)<MethodDeclaration>(.*)"))
+					temp[i] = temp[i].substring(0, temp[i].indexOf("<MethodDeclaration>"));
+				if (temp[i].matches("(?s)(.*)<FieldDeclaration>(.*)"))
+					temp[i] = temp[i].substring(0, temp[i].indexOf("<FieldDeclaration>"));
+				if (temp[i].matches("(?s)(.*)<Javadoc>(.*)"))
+					temp[i] = temp[i].substring(temp[i].indexOf("</Javadoc>"));
+				if (temp[i].matches("(?s)(.*)<MarkerAnnotation>(.*)"))
+					temp[i] = temp[i].substring(temp[i].indexOf("</MarkerAnnotation>"));
+				if (temp[i].matches("(?s)(.*)<SingleMemberAnnotation>(.*)"))
+					temp[i] = temp[i].substring(temp[i].indexOf("</SingleMemberAnnotation>"));
+				temp[i] = temp[i].substring(temp[i].indexOf("<SimpleName>") + 12, temp[i].indexOf("</SimpleName>"));
+				if (temp[i].toLowerCase().matches("(?s)(.*)" + targetClassName.toLowerCase() + "(.*)")) {
+					String temp2[] = ast.split("<TypeDeclaration>");
+					temp1 = temp2[i];
+				}
+			}
+		} else
+			temp1 = ast;
+
+		String temp[] = temp1.split("<MethodDeclaration>");
+		methodArgs = new String[temp.length-1][];
+		
+		for (int i = 1; i < temp.length; i++) {
+			if (temp[i].matches("(?s)(.*)<Javadoc>(.*)"))
+				temp[i] = temp[i].substring(temp[i].indexOf("</Javadoc>"));
+			if (temp[i].matches("(?s)(.*)<Block>(.*)"))
+				temp[i] = temp[i].substring(0, temp[i].indexOf("<Block>"));
+			if (temp[i].matches("(?s)(.*)<MarkerAnnotation>(.*)"))
+				temp[i] = temp[i].substring(temp[i].indexOf("</MarkerAnnotation>"));
+			if (temp[i].matches("(?s)(.*)<SingleMemberAnnotation>(.*)"))
+				temp[i] = temp[i].substring(temp[i].indexOf("</SingleMemberAnnotation>"));
+			if (temp[i].matches("(?s)(.*)<SingleVariableDeclaration>(.*)"))
+				temp[i] = temp[i].substring(temp[i].indexOf("<SingleVariableDeclaration>"));
+
+			String temp2[] = temp[i].split("<SingleVariableDeclaration>");
+			methodArgs[i-1] = new String[temp2.length-1];
+			
+			for (int j = 1; j < temp2.length; j++){
+				if (temp2[j].matches("(?s)(.*)<PrimitiveType>(.*)"))
+					temp2[j] = temp2[j].substring(temp2[j].indexOf("<PrimitiveType>") + 15,
+							temp2[j].indexOf("</PrimitiveType>"));
+				else if (temp2[j].matches("(?s)(.*)<SimpleType>(.*)"))
+					temp2[j] = temp2[j].substring(temp2[j].indexOf("<SimpleName>") + 12, temp2[j].indexOf("</SimpleName>"));
+				else
+					temp2[j] = "-1";
+				
+				methodArgs[i-1][j-1] = temp2[j];
+			}
+		}
+	}
+	
 	public String hasTrueBlock(String text) {
 		text = text.substring(text.indexOf("<Block>") + 7, text.indexOf("</Block>"));
 		String[] temp = text.trim().split("\\n+");

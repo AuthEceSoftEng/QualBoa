@@ -21,7 +21,23 @@ public class Scorer {
 		return results;
 	}
 
+	private static void testScoringSystem() throws IOException {
+		String inputContent = new String(Files.readAllBytes(Paths.get("input.java")), "UTF-8");
+		Scorer scorer = new Scorer("", new ArrayList<DownloadedFile>(), "_,_,_,_,_,_,_");
+		String content = new String(Files.readAllBytes(Paths.get("input2.java")), "UTF-8");
+
+		Signature inputSignature = new Signature(inputContent);
+		Signature outputSignature = new Signature(content, inputSignature.getClassName());
+
+		double score = scorer.calculateScore(inputSignature, outputSignature);
+		System.out.println(score);
+		System.exit(0);
+	}
+	
 	public static void main(String[] args) throws Exception {
+		// Uncomment the following line to test the scoring system on two files
+		// testScoringSystem();
+
 		// testing
 		String inputContent = new String(Files.readAllBytes(Paths.get("input.java")), "UTF-8");
 		FileHandler fileHandler = new FileHandler("Files");

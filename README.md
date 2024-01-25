@@ -12,5 +12,4 @@ Recommendations of Source Code Components." In Proceedings of the 13th Working C
 Software Repositories (MSR), pp. 488-491, 2016.
 ```
 
-The marked dataset and more info on this work can be found at:
-[http://issel.ee.auth.gr/software-algorithms/](http://issel.ee.auth.gr/software-algorithms/)
+The marked dataset and the boa query used in this work can be found at file [datasetMSR.zip](https://github.com/AuthEceSoftEng/QualBoa/raw/master/datasetMSR.zip)
